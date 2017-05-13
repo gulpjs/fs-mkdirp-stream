@@ -165,4 +165,27 @@ describe('mkdirpStream', function() {
     ], done);
   });
 
+  it('bubbles mkdir errors', function(done) {
+
+    expect.spyOn(fs, 'mkdir').andCall(function(dirpath, mode, cb) {
+      cb(new Error('boom'));
+    });
+
+    function notExists() {
+      statMode(outputDirpath);
+    }
+
+    function assert(err) {
+      expect(err).toExist();
+      expect(notExists).toThrow();
+      done();
+    }
+
+    pipe([
+      from(['test']),
+      mkdirpStream(outputDirpath),
+      concat(),
+    ], assert);
+  });
+
 });

@@ -262,4 +262,57 @@ describe('mkdirp', function() {
       });
     });
   });
+
+  it('surfaces mkdir errors that happening during recursion', function(done) {
+
+    var ogMkdir = fs.mkdir;
+
+    var spy = expect.spyOn(fs, 'mkdir').andCall(function(dirpath, mode, cb) {
+      if (spy.calls.length === 1) {
+        return ogMkdir(dirpath, mode, cb);
+      }
+      cb(new Error('boom'));
+    });
+
+    mkdirp(outputNestedDirpath, function(err) {
+      expect(err).toExist();
+
+      done();
+    });
+  });
+
+  it('surfaces fs.stat errors', function(done) {
+
+    expect.spyOn(fs, 'stat').andCall(function(dirpath, cb) {
+      cb(new Error('boom'));
+    });
+
+    mkdirp(outputDirpath, function(err) {
+      expect(err).toExist();
+
+      done();
+    });
+  });
+
+  it('does not attempt fs.chmod if custom mode matches mode on disk', function(done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
+    var mode = applyUmask('700');
+
+    mkdirp(outputDirpath, mode, function(err) {
+      expect(err).toNotExist();
+
+      var spy = expect.spyOn(fs, 'chmod').andCallThrough();
+
+      mkdirp(outputDirpath, mode, function(err) {
+        expect(err).toNotExist();
+        expect(spy.calls.length).toEqual(0);
+
+        done();
+      });
+    });
+  });
 });

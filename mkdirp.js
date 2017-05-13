@@ -4,6 +4,7 @@ var path = require('path');
 
 var fs = require('graceful-fs');
 
+var MASK_MODE = parseInt('7777', 8);
 var DEFAULT_DIR_MODE = parseInt('0777', 8);
 
 function mkdirp(dirpath, customMode, callback) {
@@ -45,7 +46,8 @@ function mkdirp(dirpath, customMode, callback) {
         return callback(mkdirErr);
       }
 
-      if (stats.mode === mode) {
+      // TODO: Is it proper to mask like this?
+      if ((stats.mode & MASK_MODE) === mode) {
         return callback();
       }
 
