@@ -1,6 +1,6 @@
 {
   "name": "fs-mkdirp-stream",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Ensure directories exist before writing to them.",
   "author": "Gulp Team <team@gulpjs.com> (http://gulpjs.com/)",
   "contributors": [
