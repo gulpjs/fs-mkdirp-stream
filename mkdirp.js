@@ -13,7 +13,7 @@ function mkdirp(dirpath, customMode, callback) {
     customMode = undefined;
   }
 
-  var mode = customMode || DEFAULT_DIR_MODE & ~process.umask();
+  var mode = customMode || DEFAULT_DIR_MODE;
   dirpath = path.resolve(dirpath);
 
   fs.mkdir(dirpath, mode, onMkdir);
@@ -46,12 +46,12 @@ function mkdirp(dirpath, customMode, callback) {
         return callback(mkdirErr);
       }
 
-      // TODO: Is it proper to mask like this?
-      if ((stats.mode & MASK_MODE) === mode) {
+      if (!customMode) {
         return callback();
       }
 
-      if (!customMode) {
+      // TODO: Is it proper to mask like this?
+      if ((stats.mode & MASK_MODE) === mode) {
         return callback();
       }
 
@@ -64,7 +64,7 @@ function mkdirp(dirpath, customMode, callback) {
       return callback(recurseErr);
     }
 
-    mkdirp(dirpath, mode, callback);
+    mkdirp(dirpath, customMode, callback);
   }
 }
 
