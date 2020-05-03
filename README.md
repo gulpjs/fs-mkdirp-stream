@@ -51,6 +51,8 @@ The same as the top-level API but for object streams. See the example to see the
 
 MIT
 
+Contains a custom implementation of `mkdirp` originally based on https://github.com/substack/node-mkdirp (Licensed MIT/X11 - Copyright 2010 James Halliday) with heavy modification to better support custom modes.
+
 <!-- prettier-ignore-start -->
 [downloads-image]: https://img.shields.io/npm/dm/fs-mkdirp-stream.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/fs-mkdirp-stream
