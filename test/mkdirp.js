@@ -4,6 +4,7 @@ var os = require('os');
 var path = require('path');
 
 var fs = require('graceful-fs');
+var mock = require('jest-mock');
 var expect = require('expect');
 var rimraf = require('rimraf');
 
@@ -24,7 +25,7 @@ describe('mkdirp', function() {
   function cleanup(done) {
     this.timeout(20000);
 
-    expect.restoreSpies();
+    mock.restoreAllMocks();
 
     // Async del to get sort-of-fix for https://github.com/isaacs/rimraf/issues/72
     rimraf(outputBase, done);
@@ -63,8 +64,8 @@ describe('mkdirp', function() {
 
   it('makes a single directory', function(done) {
     mkdirp(outputDirpath, function(err) {
-      expect(err).toNotExist();
-      expect(statMode(outputDirpath)).toExist();
+      expect(err).toBeFalsy();
+      expect(statMode(outputDirpath)).toBeDefined();
 
       done();
     });
@@ -79,7 +80,7 @@ describe('mkdirp', function() {
     var defaultMode = applyUmask(DEFAULT_DIR_MODE);
 
     mkdirp(outputDirpath, function(err) {
-      expect(err).toNotExist();
+      expect(err).toBeFalsy();
       expect(statMode(outputDirpath)).toEqual(defaultMode);
 
       done();
@@ -88,8 +89,8 @@ describe('mkdirp', function() {
 
   it('makes multiple directories', function(done) {
     mkdirp(outputNestedDirpath, function(err) {
-      expect(err).toNotExist();
-      expect(statMode(outputNestedDirpath)).toExist();
+      expect(err).toBeFalsy();
+      expect(statMode(outputNestedDirpath)).toBeDefined();
 
       done();
     });
@@ -104,7 +105,7 @@ describe('mkdirp', function() {
     var defaultMode = applyUmask(DEFAULT_DIR_MODE);
 
     mkdirp(outputNestedDirpath, function(err) {
-      expect(err).toNotExist();
+      expect(err).toBeFalsy();
       expect(statMode(outputNestedDirpath)).toEqual(defaultMode);
 
       done();
@@ -120,7 +121,7 @@ describe('mkdirp', function() {
     var mode = applyUmask('700');
 
     mkdirp(outputDirpath, mode, function(err) {
-      expect(err).toNotExist();
+      expect(err).toBeFalsy();
       expect(statMode(outputDirpath)).toEqual(mode);
 
       done();
@@ -136,7 +137,7 @@ describe('mkdirp', function() {
     var mode = applyUmask('2700');
 
     mkdirp(outputDirpath, mode, function(err) {
-      expect(err).toNotExist();
+      expect(err).toBeFalsy();
       expect(statMode(outputDirpath)).toEqual(mode);
 
       done();
@@ -152,10 +153,10 @@ describe('mkdirp', function() {
     var mode = applyUmask('700');
 
     mkdirp(outputDirpath, mode, function(err) {
-      expect(err).toNotExist();
+      expect(err).toBeFalsy();
 
       mkdirp(outputDirpath, function(err2) {
-        expect(err2).toNotExist();
+        expect(err2).toBeFalsy();
         expect(statMode(outputDirpath)).toEqual(mode);
 
         done();
@@ -172,7 +173,7 @@ describe('mkdirp', function() {
     var mode = applyUmask('700');
 
     mkdirp(outputNestedDirpath, mode, function(err) {
-      expect(err).toNotExist();
+      expect(err).toBeFalsy();
       expect(statMode(outputNestedDirpath)).toEqual(mode);
 
       done();
@@ -190,7 +191,7 @@ describe('mkdirp', function() {
     var defaultMode = applyUmask(DEFAULT_DIR_MODE);
 
     mkdirp(outputNestedDirpath, mode, function(err) {
-      expect(err).toNotExist();
+      expect(err).toBeFalsy();
       expect(statMode(outputDirpath)).toEqual(defaultMode);
       expect(statMode(intermediateDirpath)).toEqual(defaultMode);
 
@@ -208,11 +209,11 @@ describe('mkdirp', function() {
     var defaultMode = applyUmask(DEFAULT_DIR_MODE);
 
     mkdirp(outputDirpath, function(err) {
-      expect(err).toNotExist();
+      expect(err).toBeFalsy();
       expect(statMode(outputDirpath)).toEqual(defaultMode);
 
       mkdirp(outputDirpath, mode, function(err2) {
-        expect(err2).toNotExist();
+        expect(err2).toBeFalsy();
         expect(statMode(outputDirpath)).toEqual(mode);
 
         done();
@@ -222,13 +223,13 @@ describe('mkdirp', function() {
 
   it('errors with EEXIST if file in path', function(done) {
     mkdirp(outputDirpath, function(err) {
-      expect(err).toNotExist();
+      expect(err).toBeFalsy();
 
       fs.writeFile(outputNestedPath, contents, function(err2) {
-        expect(err2).toNotExist();
+        expect(err2).toBeFalsy();
 
         mkdirp(outputNestedPath, function(err3) {
-          expect(err3).toExist();
+          expect(err3).toBeDefined();
           expect(err3.code).toEqual('EEXIST');
 
           done();
@@ -246,15 +247,15 @@ describe('mkdirp', function() {
     var mode = applyUmask('700');
 
     mkdirp(outputDirpath, function(err) {
-      expect(err).toNotExist();
+      expect(err).toBeFalsy();
 
       fs.writeFile(outputNestedPath, contents, function(err2) {
-        expect(err2).toNotExist();
+        expect(err2).toBeFalsy();
 
         var expectedMode = statMode(outputNestedPath);
 
         mkdirp(outputNestedPath, mode, function(err3) {
-          expect(err3).toExist();
+          expect(err3).toBeDefined();
           expect(statMode(outputNestedPath)).toEqual(expectedMode);
 
           done();
@@ -267,15 +268,15 @@ describe('mkdirp', function() {
 
     var ogMkdir = fs.mkdir;
 
-    var spy = expect.spyOn(fs, 'mkdir').andCall(function(dirpath, mode, cb) {
-      if (spy.calls.length === 1) {
+    var spy = mock.spyOn(fs, 'mkdir').mockImplementation(function(dirpath, mode, cb) {
+      if (spy.mock.calls.length === 1) {
         return ogMkdir(dirpath, mode, cb);
       }
       cb(new Error('boom'));
     });
 
     mkdirp(outputNestedDirpath, function(err) {
-      expect(err).toExist();
+      expect(err).toBeDefined();
 
       done();
     });
@@ -283,12 +284,12 @@ describe('mkdirp', function() {
 
   it('surfaces fs.stat errors', function(done) {
 
-    expect.spyOn(fs, 'stat').andCall(function(dirpath, cb) {
+    mock.spyOn(fs, 'stat').mockImplementation(function(dirpath, cb) {
       cb(new Error('boom'));
     });
 
     mkdirp(outputDirpath, function(err) {
-      expect(err).toExist();
+      expect(err).toBeDefined();
 
       done();
     });
@@ -303,13 +304,13 @@ describe('mkdirp', function() {
     var mode = applyUmask('700');
 
     mkdirp(outputDirpath, mode, function(err) {
-      expect(err).toNotExist();
+      expect(err).toBeFalsy();
 
-      var spy = expect.spyOn(fs, 'chmod').andCallThrough();
+      var spy = mock.spyOn(fs, 'chmod');
 
       mkdirp(outputDirpath, mode, function(err) {
-        expect(err).toNotExist();
-        expect(spy.calls.length).toEqual(0);
+        expect(err).toBeFalsy();
+        expect(spy).toHaveBeenCalledTimes(0);
 
         done();
       });
