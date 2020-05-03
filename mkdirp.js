@@ -13,7 +13,7 @@ function mkdirp(dirpath, customMode, callback) {
     customMode = undefined;
   }
 
-  var mode = customMode || (DEFAULT_DIR_MODE & ~process.umask());
+  var mode = customMode || DEFAULT_DIR_MODE & ~process.umask();
   dirpath = path.resolve(dirpath);
 
   fs.mkdir(dirpath, mode, onMkdir);

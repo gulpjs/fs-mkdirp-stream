@@ -17,15 +17,20 @@ var to = require('to2');
 var from = require('from2');
 var mkdirpStream = require('fs-mkdirp-stream');
 
-from.obj([{ dirname: '/path/to/my/', path: '/path/to/my/file.js' }])
-  .pipe(mkdirpStream.obj(function(obj, callback) {
-    // callback can take 3 arguments (err, dirname, mode)
-    callback(null, obj.dirname);
-  }))
-  .pipe(to.obj(function(obj) {
-    // This will be called once the directory exists
-    // obj === { dirname: '/path/to/my/', path: '/path/to/my/file.js' }
-  }));
+from
+  .obj([{ dirname: '/path/to/my/', path: '/path/to/my/file.js' }])
+  .pipe(
+    mkdirpStream.obj(function (obj, callback) {
+      // callback can take 3 arguments (err, dirname, mode)
+      callback(null, obj.dirname);
+    })
+  )
+  .pipe(
+    to.obj(function (obj) {
+      // This will be called once the directory exists
+      // obj === { dirname: '/path/to/my/', path: '/path/to/my/file.js' }
+    })
+  );
 ```
 
 ## API

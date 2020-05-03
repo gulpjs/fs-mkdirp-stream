@@ -10,11 +10,10 @@ var rimraf = require('rimraf');
 
 var mkdirp = require('../mkdirp');
 
-describe('mkdirp', function() {
-
+describe('mkdirp', function () {
   var MASK_MODE = parseInt('7777', 8);
   var DEFAULT_DIR_MODE = parseInt('0777', 8);
-  var isWindows = (os.platform() === 'win32');
+  var isWindows = os.platform() === 'win32';
 
   var outputBase = path.join(__dirname, './out-fixtures');
   var outputDirpath = path.join(outputBase, './foo');
@@ -44,14 +43,14 @@ describe('mkdirp', function() {
       mode = parseInt(mode, 8);
     }
 
-    return (mode & ~process.umask());
+    return mode & ~process.umask();
   }
 
   beforeEach(cleanup);
   afterEach(cleanup);
 
-  beforeEach(function(done) {
-    fs.mkdir(outputBase, function(err) {
+  beforeEach(function (done) {
+    fs.mkdir(outputBase, function (err) {
       if (err) {
         return done(err);
       }
@@ -62,8 +61,8 @@ describe('mkdirp', function() {
     });
   });
 
-  it('makes a single directory', function(done) {
-    mkdirp(outputDirpath, function(err) {
+  it('makes a single directory', function (done) {
+    mkdirp(outputDirpath, function (err) {
       expect(err).toBeFalsy();
       expect(statMode(outputDirpath)).toBeDefined();
 
@@ -71,7 +70,7 @@ describe('mkdirp', function() {
     });
   });
 
-  it('makes single directory w/ default mode', function(done) {
+  it('makes single directory w/ default mode', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -79,7 +78,7 @@ describe('mkdirp', function() {
 
     var defaultMode = applyUmask(DEFAULT_DIR_MODE);
 
-    mkdirp(outputDirpath, function(err) {
+    mkdirp(outputDirpath, function (err) {
       expect(err).toBeFalsy();
       expect(statMode(outputDirpath)).toEqual(defaultMode);
 
@@ -87,8 +86,8 @@ describe('mkdirp', function() {
     });
   });
 
-  it('makes multiple directories', function(done) {
-    mkdirp(outputNestedDirpath, function(err) {
+  it('makes multiple directories', function (done) {
+    mkdirp(outputNestedDirpath, function (err) {
       expect(err).toBeFalsy();
       expect(statMode(outputNestedDirpath)).toBeDefined();
 
@@ -96,7 +95,7 @@ describe('mkdirp', function() {
     });
   });
 
-  it('makes multiple directories w/ default mode', function(done) {
+  it('makes multiple directories w/ default mode', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -104,7 +103,7 @@ describe('mkdirp', function() {
 
     var defaultMode = applyUmask(DEFAULT_DIR_MODE);
 
-    mkdirp(outputNestedDirpath, function(err) {
+    mkdirp(outputNestedDirpath, function (err) {
       expect(err).toBeFalsy();
       expect(statMode(outputNestedDirpath)).toEqual(defaultMode);
 
@@ -112,7 +111,7 @@ describe('mkdirp', function() {
     });
   });
 
-  it('makes directory with custom mode', function(done) {
+  it('makes directory with custom mode', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -120,7 +119,7 @@ describe('mkdirp', function() {
 
     var mode = applyUmask('700');
 
-    mkdirp(outputDirpath, mode, function(err) {
+    mkdirp(outputDirpath, mode, function (err) {
       expect(err).toBeFalsy();
       expect(statMode(outputDirpath)).toEqual(mode);
 
@@ -128,7 +127,7 @@ describe('mkdirp', function() {
     });
   });
 
-  it('can create a directory with setgid permission', function(done) {
+  it('can create a directory with setgid permission', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -136,7 +135,7 @@ describe('mkdirp', function() {
 
     var mode = applyUmask('2700');
 
-    mkdirp(outputDirpath, mode, function(err) {
+    mkdirp(outputDirpath, mode, function (err) {
       expect(err).toBeFalsy();
       expect(statMode(outputDirpath)).toEqual(mode);
 
@@ -144,7 +143,7 @@ describe('mkdirp', function() {
     });
   });
 
-  it('does not change directory mode if exists and no mode given', function(done) {
+  it('does not change directory mode if exists and no mode given', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -152,10 +151,10 @@ describe('mkdirp', function() {
 
     var mode = applyUmask('700');
 
-    mkdirp(outputDirpath, mode, function(err) {
+    mkdirp(outputDirpath, mode, function (err) {
       expect(err).toBeFalsy();
 
-      mkdirp(outputDirpath, function(err2) {
+      mkdirp(outputDirpath, function (err2) {
         expect(err2).toBeFalsy();
         expect(statMode(outputDirpath)).toEqual(mode);
 
@@ -164,7 +163,7 @@ describe('mkdirp', function() {
     });
   });
 
-  it('makes multiple directories with custom mode', function(done) {
+  it('makes multiple directories with custom mode', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -172,7 +171,7 @@ describe('mkdirp', function() {
 
     var mode = applyUmask('700');
 
-    mkdirp(outputNestedDirpath, mode, function(err) {
+    mkdirp(outputNestedDirpath, mode, function (err) {
       expect(err).toBeFalsy();
       expect(statMode(outputNestedDirpath)).toEqual(mode);
 
@@ -180,7 +179,7 @@ describe('mkdirp', function() {
     });
   });
 
-  it('uses default mode on intermediate directories', function(done) {
+  it('uses default mode on intermediate directories', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -190,7 +189,7 @@ describe('mkdirp', function() {
     var mode = applyUmask('700');
     var defaultMode = applyUmask(DEFAULT_DIR_MODE);
 
-    mkdirp(outputNestedDirpath, mode, function(err) {
+    mkdirp(outputNestedDirpath, mode, function (err) {
       expect(err).toBeFalsy();
       expect(statMode(outputDirpath)).toEqual(defaultMode);
       expect(statMode(intermediateDirpath)).toEqual(defaultMode);
@@ -199,7 +198,7 @@ describe('mkdirp', function() {
     });
   });
 
-  it('changes mode of existing directory', function(done) {
+  it('changes mode of existing directory', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -208,11 +207,11 @@ describe('mkdirp', function() {
     var mode = applyUmask('700');
     var defaultMode = applyUmask(DEFAULT_DIR_MODE);
 
-    mkdirp(outputDirpath, function(err) {
+    mkdirp(outputDirpath, function (err) {
       expect(err).toBeFalsy();
       expect(statMode(outputDirpath)).toEqual(defaultMode);
 
-      mkdirp(outputDirpath, mode, function(err2) {
+      mkdirp(outputDirpath, mode, function (err2) {
         expect(err2).toBeFalsy();
         expect(statMode(outputDirpath)).toEqual(mode);
 
@@ -221,14 +220,14 @@ describe('mkdirp', function() {
     });
   });
 
-  it('errors with EEXIST if file in path', function(done) {
-    mkdirp(outputDirpath, function(err) {
+  it('errors with EEXIST if file in path', function (done) {
+    mkdirp(outputDirpath, function (err) {
       expect(err).toBeFalsy();
 
-      fs.writeFile(outputNestedPath, contents, function(err2) {
+      fs.writeFile(outputNestedPath, contents, function (err2) {
         expect(err2).toBeFalsy();
 
-        mkdirp(outputNestedPath, function(err3) {
+        mkdirp(outputNestedPath, function (err3) {
           expect(err3).toBeDefined();
           expect(err3.code).toEqual('EEXIST');
 
@@ -238,7 +237,7 @@ describe('mkdirp', function() {
     });
   });
 
-  it('does not change mode of existing file', function(done) {
+  it('does not change mode of existing file', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -246,15 +245,15 @@ describe('mkdirp', function() {
 
     var mode = applyUmask('700');
 
-    mkdirp(outputDirpath, function(err) {
+    mkdirp(outputDirpath, function (err) {
       expect(err).toBeFalsy();
 
-      fs.writeFile(outputNestedPath, contents, function(err2) {
+      fs.writeFile(outputNestedPath, contents, function (err2) {
         expect(err2).toBeFalsy();
 
         var expectedMode = statMode(outputNestedPath);
 
-        mkdirp(outputNestedPath, mode, function(err3) {
+        mkdirp(outputNestedPath, mode, function (err3) {
           expect(err3).toBeDefined();
           expect(statMode(outputNestedPath)).toEqual(expectedMode);
 
@@ -264,38 +263,38 @@ describe('mkdirp', function() {
     });
   });
 
-  it('surfaces mkdir errors that happening during recursion', function(done) {
-
+  it('surfaces mkdir errors that happening during recursion', function (done) {
     var ogMkdir = fs.mkdir;
 
-    var spy = mock.spyOn(fs, 'mkdir').mockImplementation(function(dirpath, mode, cb) {
-      if (spy.mock.calls.length === 1) {
-        return ogMkdir(dirpath, mode, cb);
-      }
-      cb(new Error('boom'));
-    });
+    var spy = mock
+      .spyOn(fs, 'mkdir')
+      .mockImplementation(function (dirpath, mode, cb) {
+        if (spy.mock.calls.length === 1) {
+          return ogMkdir(dirpath, mode, cb);
+        }
+        cb(new Error('boom'));
+      });
 
-    mkdirp(outputNestedDirpath, function(err) {
+    mkdirp(outputNestedDirpath, function (err) {
       expect(err).toBeDefined();
 
       done();
     });
   });
 
-  it('surfaces fs.stat errors', function(done) {
-
-    mock.spyOn(fs, 'stat').mockImplementation(function(dirpath, cb) {
+  it('surfaces fs.stat errors', function (done) {
+    mock.spyOn(fs, 'stat').mockImplementation(function (dirpath, cb) {
       cb(new Error('boom'));
     });
 
-    mkdirp(outputDirpath, function(err) {
+    mkdirp(outputDirpath, function (err) {
       expect(err).toBeDefined();
 
       done();
     });
   });
 
-  it('does not attempt fs.chmod if custom mode matches mode on disk', function(done) {
+  it('does not attempt fs.chmod if custom mode matches mode on disk', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -303,12 +302,12 @@ describe('mkdirp', function() {
 
     var mode = applyUmask('700');
 
-    mkdirp(outputDirpath, mode, function(err) {
+    mkdirp(outputDirpath, mode, function (err) {
       expect(err).toBeFalsy();
 
       var spy = mock.spyOn(fs, 'chmod');
 
-      mkdirp(outputDirpath, mode, function(err) {
+      mkdirp(outputDirpath, mode, function (err) {
         expect(err).toBeFalsy();
         expect(spy).toHaveBeenCalledTimes(0);
 

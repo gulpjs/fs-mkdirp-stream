@@ -13,7 +13,6 @@ function toFunction(dirpath) {
 }
 
 function define(options) {
-
   function mkdirpStream(resolver) {
     // Handle resolver that's just a dirpath
     if (typeof resolver === 'string') {

@@ -15,10 +15,9 @@ var pipe = miss.pipe;
 var from = miss.from;
 var concat = miss.concat;
 
-describe('mkdirpStream', function() {
-
+describe('mkdirpStream', function () {
   var MASK_MODE = parseInt('7777', 8);
-  var isWindows = (os.platform() === 'win32');
+  var isWindows = os.platform() === 'win32';
 
   var outputBase = path.join(__dirname, './out-fixtures');
   var outputDirpath = path.join(outputBase, './foo');
@@ -45,14 +44,14 @@ describe('mkdirpStream', function() {
       mode = parseInt(mode, 8);
     }
 
-    return (mode & ~process.umask());
+    return mode & ~process.umask();
   }
 
   beforeEach(cleanup);
   afterEach(cleanup);
 
-  beforeEach(function(done) {
-    fs.mkdir(outputBase, function(err) {
+  beforeEach(function (done) {
+    fs.mkdir(outputBase, function (err) {
       if (err) {
         return done(err);
       }
@@ -63,26 +62,21 @@ describe('mkdirpStream', function() {
     });
   });
 
-  it('exports a main function, .obj and .withMode methods', function(done) {
+  it('exports a main function, .obj and .withMode methods', function (done) {
     expect(typeof mkdirpStream).toEqual('function');
     expect(typeof mkdirpStream.obj).toEqual('function');
     done();
   });
 
-  it('takes a string to create', function(done) {
-
+  it('takes a string to create', function (done) {
     function assert() {
       expect(statMode(outputDirpath)).toBeDefined();
     }
 
-    pipe([
-      from(['test']),
-      mkdirpStream(outputDirpath),
-      concat(assert),
-    ], done);
+    pipe([from(['test']), mkdirpStream(outputDirpath), concat(assert)], done);
   });
 
-  it('takes a resolver function that receives chunk', function(done) {
+  it('takes a resolver function that receives chunk', function (done) {
     var expected = Buffer.from('test');
 
     function resolver(chunk, cb) {
@@ -94,14 +88,10 @@ describe('mkdirpStream', function() {
       expect(statMode(outputDirpath)).toBeDefined();
     }
 
-    pipe([
-      from(['test']),
-      mkdirpStream(resolver),
-      concat(assert),
-    ], done);
+    pipe([from(['test']), mkdirpStream(resolver), concat(assert)], done);
   });
 
-  it('can pass a mode as the 3rd argument to the resolver callback', function(done) {
+  it('can pass a mode as the 3rd argument to the resolver callback', function (done) {
     if (isWindows) {
       this.skip();
       return;
@@ -120,15 +110,10 @@ describe('mkdirpStream', function() {
       expect(statMode(outputDirpath)).toEqual(mode);
     }
 
-    pipe([
-      from(['test']),
-      mkdirpStream(resolver),
-      concat(assert),
-    ], done);
+    pipe([from(['test']), mkdirpStream(resolver), concat(assert)], done);
   });
 
-  it('can pass an error as the 1st argument to the resolver callback to error', function(done) {
-
+  it('can pass an error as the 1st argument to the resolver callback to error', function (done) {
     function resolver(chunk, cb) {
       cb(new Error('boom'));
     }
@@ -143,15 +128,10 @@ describe('mkdirpStream', function() {
       done();
     }
 
-    pipe([
-      from(['test']),
-      mkdirpStream(resolver),
-      concat(),
-    ], assert);
+    pipe([from(['test']), mkdirpStream(resolver), concat()], assert);
   });
 
-  it('works with objectMode', function(done) {
-
+  it('works with objectMode', function (done) {
     function resolver(chunk, cb) {
       expect(typeof chunk).toEqual('object');
       expect(chunk.dirname).toBeDefined();
@@ -162,16 +142,18 @@ describe('mkdirpStream', function() {
       expect(statMode(outputDirpath)).toBeDefined();
     }
 
-    pipe([
-      from.obj([{ dirname: outputDirpath }]),
-      mkdirpStream.obj(resolver),
-      concat(assert),
-    ], done);
+    pipe(
+      [
+        from.obj([{ dirname: outputDirpath }]),
+        mkdirpStream.obj(resolver),
+        concat(assert),
+      ],
+      done
+    );
   });
 
-  it('bubbles mkdir errors', function(done) {
-
-    mock.spyOn(fs, 'mkdir').mockImplementation(function(dirpath, mode, cb) {
+  it('bubbles mkdir errors', function (done) {
+    mock.spyOn(fs, 'mkdir').mockImplementation(function (dirpath, mode, cb) {
       cb(new Error('boom'));
     });
 
@@ -185,11 +167,6 @@ describe('mkdirpStream', function() {
       done();
     }
 
-    pipe([
-      from(['test']),
-      mkdirpStream(outputDirpath),
-      concat(),
-    ], assert);
+    pipe([from(['test']), mkdirpStream(outputDirpath), concat()], assert);
   });
-
 });
