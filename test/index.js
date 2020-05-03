@@ -5,6 +5,7 @@ var path = require('path');
 
 var fs = require('graceful-fs');
 var miss = require('mississippi');
+var mock = require('jest-mock');
 var expect = require('expect');
 var rimraf = require('rimraf');
 
@@ -25,7 +26,7 @@ describe('mkdirpStream', function() {
   function cleanup(done) {
     this.timeout(20000);
 
-    expect.restoreSpies();
+    mock.restoreAllMocks();
 
     // Async del to get sort-of-fix for https://github.com/isaacs/rimraf/issues/72
     rimraf(outputBase, done);
@@ -71,7 +72,7 @@ describe('mkdirpStream', function() {
   it('takes a string to create', function(done) {
 
     function assert() {
-      expect(statMode(outputDirpath)).toExist();
+      expect(statMode(outputDirpath)).toBeDefined();
     }
 
     pipe([
@@ -82,14 +83,15 @@ describe('mkdirpStream', function() {
   });
 
   it('takes a resolver function that receives chunk', function(done) {
+    var expected = Buffer.from('test');
 
     function resolver(chunk, cb) {
-      expect(chunk).toEqual('test');
+      expect(chunk.equals(expected)).toEqual(true);
       cb(null, outputDirpath);
     }
 
     function assert() {
-      expect(statMode(outputDirpath)).toExist();
+      expect(statMode(outputDirpath)).toBeDefined();
     }
 
     pipe([
@@ -107,8 +109,10 @@ describe('mkdirpStream', function() {
 
     var mode = applyUmask('700');
 
+    var expected = Buffer.from('test');
+
     function resolver(chunk, cb) {
-      expect(chunk).toEqual('test');
+      expect(chunk.equals(expected)).toEqual(true);
       cb(null, outputDirpath, mode);
     }
 
@@ -134,7 +138,7 @@ describe('mkdirpStream', function() {
     }
 
     function assert(err) {
-      expect(err).toExist();
+      expect(err).toBeDefined();
       expect(notExists).toThrow();
       done();
     }
@@ -150,12 +154,12 @@ describe('mkdirpStream', function() {
 
     function resolver(chunk, cb) {
       expect(typeof chunk).toEqual('object');
-      expect(chunk.dirname).toExist();
+      expect(chunk.dirname).toBeDefined();
       cb(null, chunk.dirname);
     }
 
     function assert() {
-      expect(statMode(outputDirpath)).toExist();
+      expect(statMode(outputDirpath)).toBeDefined();
     }
 
     pipe([
@@ -167,7 +171,7 @@ describe('mkdirpStream', function() {
 
   it('bubbles mkdir errors', function(done) {
 
-    expect.spyOn(fs, 'mkdir').andCall(function(dirpath, mode, cb) {
+    mock.spyOn(fs, 'mkdir').mockImplementation(function(dirpath, mode, cb) {
       cb(new Error('boom'));
     });
 
@@ -176,7 +180,7 @@ describe('mkdirpStream', function() {
     }
 
     function assert(err) {
-      expect(err).toExist();
+      expect(err).toBeDefined();
       expect(notExists).toThrow();
       done();
     }

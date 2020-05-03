@@ -6,7 +6,7 @@
 
 # fs-mkdirp-stream
 
-[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][travis-image]][travis-url] [![AppVeyor Build Status][appveyor-image]][appveyor-url] [![Coveralls Status][coveralls-image]][coveralls-url] [![Gitter chat][gitter-image]][gitter-url]
+[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Build Status][ci-image]][ci-url] [![Coveralls Status][coveralls-image]][coveralls-url]
 
 Ensure directories exist before writing to them.
 
@@ -46,20 +46,14 @@ The same as the top-level API but for object streams. See the example to see the
 
 MIT
 
-Contains a custom implementation of `mkdirp` originally based on https://github.com/substack/node-mkdirp (Licensed MIT/X11 - Copyright 2010 James Halliday) with heavy modification to better support custom modes.
+<!-- prettier-ignore-start -->
+[downloads-image]: https://img.shields.io/npm/dm/fs-mkdirp-stream.svg?style=flat-square
+[npm-url]: https://www.npmjs.com/package/fs-mkdirp-stream
+[npm-image]: https://img.shields.io/npm/v/fs-mkdirp-stream.svg?style=flat-square
 
-[downloads-image]: http://img.shields.io/npm/dm/fs-mkdirp-stream.svg
-[npm-url]: https://npmjs.com/package/fs-mkdirp-stream
-[npm-image]: http://img.shields.io/npm/v/fs-mkdirp-stream.svg
-
-[travis-url]: https://travis-ci.org/gulpjs/fs-mkdirp-stream
-[travis-image]: http://img.shields.io/travis/gulpjs/fs-mkdirp-stream.svg?label=travis-ci
-
-[appveyor-url]: https://ci.appveyor.com/project/gulpjs/fs-mkdirp-stream
-[appveyor-image]: https://img.shields.io/appveyor/ci/gulpjs/fs-mkdirp-stream.svg?label=appveyor
+[ci-url]: https://github.com/gulpjs/fs-mkdirp-stream/actions?query=workflow:dev
+[ci-image]: https://img.shields.io/github/workflow/status/gulpjs/fs-mkdirp-stream/dev?style=flat-square
 
 [coveralls-url]: https://coveralls.io/r/gulpjs/fs-mkdirp-stream
-[coveralls-image]: http://img.shields.io/coveralls/gulpjs/fs-mkdirp-stream/master.svg
-
-[gitter-url]: https://gitter.im/gulpjs/gulp
-[gitter-image]: https://badges.gitter.im/gulpjs/gulp.png
+[coveralls-image]: https://img.shields.io/coveralls/gulpjs/fs-mkdirp-stream/master.svg?style=flat-square
+<!-- prettier-ignore-end -->
