@@ -14,6 +14,9 @@ function mkdirp(dirpath, customMode, callback) {
   }
 
   var mode = customMode || DEFAULT_DIR_MODE;
+  if (typeof mode === 'string') {
+    mode = parseInt(mode, 8);
+  }
   dirpath = path.resolve(dirpath);
 
   fs.mkdir(dirpath, mode, onMkdir);
@@ -50,7 +53,6 @@ function mkdirp(dirpath, customMode, callback) {
         return callback();
       }
 
-      // TODO: Is it proper to mask like this?
       if ((stats.mode & MASK_MODE) === mode) {
         return callback();
       }
