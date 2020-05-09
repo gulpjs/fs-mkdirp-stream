@@ -58,14 +58,19 @@ function suite () {
       mode = parseInt(mode, 8);
     }
 
+    log.expected(mode);
+    return mode;
+  }
+
+  function expectedDefaultMode()  {
     // Set to use to "get" it
     var current = process.umask(0);
     // Then set it back for the next test
     process.umask(current);
 
-    var umaskedMode = (mode & ~current);
-    log.expected(umaskedMode);
-    return umaskedMode;
+    var mode = (DEFAULT_DIR_MODE & ~current);
+    log.expected(mode);
+    return mode;
   }
 
   beforeEach(cleanup);
@@ -100,7 +105,7 @@ function suite () {
 
     mkdirp(outputDirpath, function (err) {
       expect(err).toBeFalsy();
-      expect(createdMode(outputDirpath)).toEqual(expectedMode(DEFAULT_DIR_MODE));
+      expect(createdMode(outputDirpath)).toEqual(expectedDefaultMode());
 
       done();
     });
@@ -123,7 +128,7 @@ function suite () {
 
     mkdirp(outputNestedDirpath, function (err) {
       expect(err).toBeFalsy();
-      expect(createdMode(outputNestedDirpath)).toEqual(expectedMode(DEFAULT_DIR_MODE));
+      expect(createdMode(outputNestedDirpath)).toEqual(expectedDefaultMode());
 
       done();
     });
@@ -135,7 +140,7 @@ function suite () {
       return;
     }
 
-    var mode = '700';
+    var mode = '777';
 
     mkdirp(outputDirpath, mode, function (err) {
       expect(err).toBeFalsy();
@@ -151,7 +156,7 @@ function suite () {
       return;
     }
 
-    var mode = parseInt('700', 8);
+    var mode = parseInt('777', 8);
 
     mkdirp(outputDirpath, mode, function (err) {
       expect(err).toBeFalsy();
@@ -159,7 +164,23 @@ function suite () {
 
       done();
     });
-  })
+  });
+
+  it('does not mask a custom mode', function (done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
+    var mode = parseInt('777', 8);
+
+    mkdirp(outputDirpath, mode, function (err) {
+      expect(err).toBeFalsy();
+      expect(createdMode(outputDirpath)).toEqual(mode);
+
+      done();
+    });
+  });
 
   it('can create a directory with setgid permission', function (done) {
     if (isWindows) {
@@ -183,7 +204,7 @@ function suite () {
       return;
     }
 
-    var mode = '700';
+    var mode = '777';
 
     mkdirp(outputDirpath, mode, function (err) {
       expect(err).toBeFalsy();
@@ -203,7 +224,7 @@ function suite () {
       return;
     }
 
-    var mode = '700';
+    var mode = '777';
 
     mkdirp(outputNestedDirpath, mode, function (err) {
       expect(err).toBeFalsy();
@@ -220,12 +241,12 @@ function suite () {
     }
 
     var intermediateDirpath = path.dirname(outputNestedDirpath);
-    var mode = '700';
+    var mode = '777';
 
     mkdirp(outputNestedDirpath, mode, function (err) {
       expect(err).toBeFalsy();
-      expect(createdMode(outputDirpath)).toEqual(expectedMode(DEFAULT_DIR_MODE));
-      expect(createdMode(intermediateDirpath)).toEqual(expectedMode(DEFAULT_DIR_MODE));
+      expect(createdMode(outputDirpath)).toEqual(expectedDefaultMode());
+      expect(createdMode(intermediateDirpath)).toEqual(expectedDefaultMode());
       expect(createdMode(outputNestedDirpath)).toEqual(expectedMode(mode));
 
       done();
@@ -238,11 +259,11 @@ function suite () {
       return;
     }
 
-    var mode = '700';
+    var mode = '777';
 
     mkdirp(outputDirpath, function (err) {
       expect(err).toBeFalsy();
-      expect(createdMode(outputDirpath)).toEqual(expectedMode(DEFAULT_DIR_MODE));
+      expect(createdMode(outputDirpath)).toEqual(expectedDefaultMode());
 
       mkdirp(outputDirpath, mode, function (err2) {
         expect(err2).toBeFalsy();
@@ -276,7 +297,7 @@ function suite () {
       return;
     }
 
-    var mode = '700';
+    var mode = '777';
 
     mkdirp(outputDirpath, function (err) {
       expect(err).toBeFalsy();
@@ -334,7 +355,7 @@ function suite () {
       return;
     }
 
-    var mode = '700';
+    var mode = '777';
 
     mkdirp(outputDirpath, mode, function (err) {
       expect(err).toBeFalsy();
@@ -370,4 +391,4 @@ describe('mkdirp with umask', function() {
 
   // Initialize the normal suite
   suite();
-})
+});
