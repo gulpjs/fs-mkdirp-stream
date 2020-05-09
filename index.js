@@ -5,9 +5,9 @@ var through = require('through2');
 var mkdirp = require('./mkdirp');
 
 function toFunction(dirpath) {
-  function stringResolver(chunk, callback) {
-    callback(null, dirpath);
-  }
+function stringResolver(chunk, callback) {
+  callback(null, dirpath);
+}
 
   return stringResolver;
 }
