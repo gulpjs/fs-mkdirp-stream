@@ -5,21 +5,20 @@ var path = require('path');
 var fs = require('graceful-fs');
 
 var MASK_MODE = parseInt('7777', 8);
-var DEFAULT_DIR_MODE = parseInt('0777', 8);
 
-function mkdirp(dirpath, customMode, callback) {
-  if (typeof customMode === 'function') {
-    callback = customMode;
-    customMode = undefined;
+function mkdirp(dirpath, mode, callback) {
+  if (typeof mode === 'function') {
+    callback = mode;
+    mode = undefined;
   }
 
-  var mode = customMode || DEFAULT_DIR_MODE;
   if (typeof mode === 'string') {
     mode = parseInt(mode, 8);
   }
+
   dirpath = path.resolve(dirpath);
 
-  fs.mkdir(dirpath, mode, onMkdir);
+  fs.mkdir(dirpath, { mode: mode }, onMkdir);
 
   function onMkdir(mkdirErr) {
     if (!mkdirErr) {
@@ -49,7 +48,7 @@ function mkdirp(dirpath, customMode, callback) {
         return callback(mkdirErr);
       }
 
-      if (!customMode) {
+      if (!mode) {
         return callback();
       }
 
@@ -66,7 +65,7 @@ function mkdirp(dirpath, customMode, callback) {
       return callback(recurseErr);
     }
 
-    mkdirp(dirpath, customMode, callback);
+    mkdirp(dirpath, mode, callback);
   }
 }
 
