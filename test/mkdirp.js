@@ -43,7 +43,12 @@ describe('mkdirp', function () {
       mode = parseInt(mode, 8);
     }
 
-    return mode & ~process.umask();
+    // Set to use to "get" it
+    var current = process.umask(0);
+    // Then set it back for the next test
+    process.umask(current);
+
+    return mode & ~current;
   }
 
   beforeEach(cleanup);
