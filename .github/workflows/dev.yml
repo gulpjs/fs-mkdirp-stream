@@ -53,6 +53,8 @@ jobs:
 
       - name: Run tests
         run: npm test
+        env:
+          VERBOSE: true
 
       - name: Coveralls
         uses: coverallsapp/github-action@v1.1.0

@@ -10,7 +10,20 @@ var rimraf = require('rimraf');
 
 var mkdirp = require('../mkdirp');
 
-describe('mkdirp', function () {
+var log = {
+  expected: function(expected) {
+    if (process.env.VERBOSE) {
+      console.log('Expected mode:', expected.toString(8));
+    }
+  },
+  found: function(found) {
+    if (process.env.VERBOSE) {
+      console.log('Found mode', found.toString(8));
+    }
+  }
+}
+
+function suite () {
   var MASK_MODE = parseInt('7777', 8);
   var DEFAULT_DIR_MODE = parseInt('0777', 8);
   var isWindows = os.platform() === 'win32';
@@ -34,16 +47,30 @@ describe('mkdirp', function () {
     return mode & MASK_MODE;
   }
 
-  function statMode(outputPath) {
-    return masked(fs.lstatSync(outputPath).mode);
+  function createdMode(outputPath) {
+    var mode = masked(fs.lstatSync(outputPath).mode);
+    log.found(mode);
+    return mode;
   }
 
-  function applyUmask(mode) {
+  function expectedMode(mode) {
     if (typeof mode !== 'number') {
       mode = parseInt(mode, 8);
     }
 
-    return mode & ~process.umask();
+    log.expected(mode);
+    return mode;
+  }
+
+  function expectedDefaultMode()  {
+    // Set to use to "get" it
+    var current = process.umask(0);
+    // Then set it back for the next test
+    process.umask(current);
+
+    var mode = (DEFAULT_DIR_MODE & ~current);
+    log.expected(mode);
+    return mode;
   }
 
   beforeEach(cleanup);
@@ -64,7 +91,7 @@ describe('mkdirp', function () {
   it('makes a single directory', function (done) {
     mkdirp(outputDirpath, function (err) {
       expect(err).toBeFalsy();
-      expect(statMode(outputDirpath)).toBeDefined();
+      expect(createdMode(outputDirpath)).toBeDefined();
 
       done();
     });
@@ -76,11 +103,9 @@ describe('mkdirp', function () {
       return;
     }
 
-    var defaultMode = applyUmask(DEFAULT_DIR_MODE);
-
     mkdirp(outputDirpath, function (err) {
       expect(err).toBeFalsy();
-      expect(statMode(outputDirpath)).toEqual(defaultMode);
+      expect(createdMode(outputDirpath)).toEqual(expectedDefaultMode());
 
       done();
     });
@@ -89,7 +114,7 @@ describe('mkdirp', function () {
   it('makes multiple directories', function (done) {
     mkdirp(outputNestedDirpath, function (err) {
       expect(err).toBeFalsy();
-      expect(statMode(outputNestedDirpath)).toBeDefined();
+      expect(createdMode(outputNestedDirpath)).toBeDefined();
 
       done();
     });
@@ -101,27 +126,57 @@ describe('mkdirp', function () {
       return;
     }
 
-    var defaultMode = applyUmask(DEFAULT_DIR_MODE);
-
     mkdirp(outputNestedDirpath, function (err) {
       expect(err).toBeFalsy();
-      expect(statMode(outputNestedDirpath)).toEqual(defaultMode);
+      expect(createdMode(outputNestedDirpath)).toEqual(expectedDefaultMode());
 
       done();
     });
   });
 
-  it('makes directory with custom mode', function (done) {
+  it('makes directory with custom mode as string', function (done) {
     if (isWindows) {
       this.skip();
       return;
     }
 
-    var mode = applyUmask('700');
+    var mode = '777';
 
     mkdirp(outputDirpath, mode, function (err) {
       expect(err).toBeFalsy();
-      expect(statMode(outputDirpath)).toEqual(mode);
+      expect(createdMode(outputDirpath)).toEqual(expectedMode(mode));
+
+      done();
+    });
+  });
+
+  it('makes directory with custom mode as octal', function (done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
+    var mode = parseInt('777', 8);
+
+    mkdirp(outputDirpath, mode, function (err) {
+      expect(err).toBeFalsy();
+      expect(createdMode(outputDirpath)).toEqual(expectedMode(mode));
+
+      done();
+    });
+  });
+
+  it('does not mask a custom mode', function (done) {
+    if (isWindows) {
+      this.skip();
+      return;
+    }
+
+    var mode = parseInt('777', 8);
+
+    mkdirp(outputDirpath, mode, function (err) {
+      expect(err).toBeFalsy();
+      expect(createdMode(outputDirpath)).toEqual(mode);
 
       done();
     });
@@ -133,11 +188,11 @@ describe('mkdirp', function () {
       return;
     }
 
-    var mode = applyUmask('2700');
+    var mode = '2700';
 
     mkdirp(outputDirpath, mode, function (err) {
       expect(err).toBeFalsy();
-      expect(statMode(outputDirpath)).toEqual(mode);
+      expect(createdMode(outputDirpath)).toEqual(expectedMode(mode));
 
       done();
     });
@@ -149,14 +204,14 @@ describe('mkdirp', function () {
       return;
     }
 
-    var mode = applyUmask('700');
+    var mode = '777';
 
     mkdirp(outputDirpath, mode, function (err) {
       expect(err).toBeFalsy();
 
       mkdirp(outputDirpath, function (err2) {
         expect(err2).toBeFalsy();
-        expect(statMode(outputDirpath)).toEqual(mode);
+        expect(createdMode(outputDirpath)).toEqual(expectedMode(mode));
 
         done();
       });
@@ -169,11 +224,11 @@ describe('mkdirp', function () {
       return;
     }
 
-    var mode = applyUmask('700');
+    var mode = '777';
 
     mkdirp(outputNestedDirpath, mode, function (err) {
       expect(err).toBeFalsy();
-      expect(statMode(outputNestedDirpath)).toEqual(mode);
+      expect(createdMode(outputNestedDirpath)).toEqual(expectedMode(mode));
 
       done();
     });
@@ -186,13 +241,13 @@ describe('mkdirp', function () {
     }
 
     var intermediateDirpath = path.dirname(outputNestedDirpath);
-    var mode = applyUmask('700');
-    var defaultMode = applyUmask(DEFAULT_DIR_MODE);
+    var mode = '777';
 
     mkdirp(outputNestedDirpath, mode, function (err) {
       expect(err).toBeFalsy();
-      expect(statMode(outputDirpath)).toEqual(defaultMode);
-      expect(statMode(intermediateDirpath)).toEqual(defaultMode);
+      expect(createdMode(outputDirpath)).toEqual(expectedDefaultMode());
+      expect(createdMode(intermediateDirpath)).toEqual(expectedDefaultMode());
+      expect(createdMode(outputNestedDirpath)).toEqual(expectedMode(mode));
 
       done();
     });
@@ -204,16 +259,15 @@ describe('mkdirp', function () {
       return;
     }
 
-    var mode = applyUmask('700');
-    var defaultMode = applyUmask(DEFAULT_DIR_MODE);
+    var mode = '777';
 
     mkdirp(outputDirpath, function (err) {
       expect(err).toBeFalsy();
-      expect(statMode(outputDirpath)).toEqual(defaultMode);
+      expect(createdMode(outputDirpath)).toEqual(expectedDefaultMode());
 
       mkdirp(outputDirpath, mode, function (err2) {
         expect(err2).toBeFalsy();
-        expect(statMode(outputDirpath)).toEqual(mode);
+        expect(createdMode(outputDirpath)).toEqual(expectedMode(mode));
 
         done();
       });
@@ -243,7 +297,7 @@ describe('mkdirp', function () {
       return;
     }
 
-    var mode = applyUmask('700');
+    var mode = '777';
 
     mkdirp(outputDirpath, function (err) {
       expect(err).toBeFalsy();
@@ -251,11 +305,12 @@ describe('mkdirp', function () {
       fs.writeFile(outputNestedPath, contents, function (err2) {
         expect(err2).toBeFalsy();
 
-        var expectedMode = statMode(outputNestedPath);
+        var existingMode = createdMode(outputNestedPath);
+        expect(existingMode).not.toEqual(mode);
 
         mkdirp(outputNestedPath, mode, function (err3) {
           expect(err3).toBeDefined();
-          expect(statMode(outputNestedPath)).toEqual(expectedMode);
+          expect(createdMode(outputNestedPath)).toEqual(existingMode);
 
           done();
         });
@@ -300,7 +355,7 @@ describe('mkdirp', function () {
       return;
     }
 
-    var mode = applyUmask('700');
+    var mode = '777';
 
     mkdirp(outputDirpath, mode, function (err) {
       expect(err).toBeFalsy();
@@ -315,4 +370,25 @@ describe('mkdirp', function () {
       });
     });
   });
+}
+
+describe('mkdirp', suite);
+
+describe('mkdirp with umask', function() {
+
+  var startingUmask;
+  before(function(done) {
+    startingUmask = process.umask(parseInt('066', 8));
+
+    done();
+  });
+
+  after(function(done) {
+    process.umask(startingUmask);
+
+    done();
+  })
+
+  // Initialize the normal suite
+  suite();
 });
