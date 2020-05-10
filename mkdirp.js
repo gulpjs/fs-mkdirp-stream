@@ -18,7 +18,7 @@ function mkdirp(dirpath, mode, callback) {
 
   dirpath = path.resolve(dirpath);
 
-  fs.mkdir(dirpath, { mode: mode }, onMkdir);
+  fs.mkdir(dirpath, mode, onMkdir);
 
   function onMkdir(mkdirErr) {
     if (!mkdirErr) {
