@@ -11,19 +11,19 @@ var rimraf = require('rimraf');
 var mkdirp = require('../mkdirp');
 
 var log = {
-  expected: function(expected) {
+  expected: function (expected) {
     if (process.env.VERBOSE) {
       console.log('Expected mode:', expected.toString(8));
     }
   },
-  found: function(found) {
+  found: function (found) {
     if (process.env.VERBOSE) {
       console.log('Found mode', found.toString(8));
     }
-  }
-}
+  },
+};
 
-function suite () {
+function suite() {
   var MASK_MODE = parseInt('7777', 8);
   var DEFAULT_DIR_MODE = parseInt('0777', 8);
   var isWindows = os.platform() === 'win32';
@@ -62,13 +62,13 @@ function suite () {
     return mode;
   }
 
-  function expectedDefaultMode()  {
+  function expectedDefaultMode() {
     // Set to use to "get" it
     var current = process.umask(0);
     // Then set it back for the next test
     process.umask(current);
 
-    var mode = (DEFAULT_DIR_MODE & ~current);
+    var mode = DEFAULT_DIR_MODE & ~current;
     log.expected(mode);
     return mode;
   }
@@ -374,20 +374,19 @@ function suite () {
 
 describe('mkdirp', suite);
 
-describe('mkdirp with umask', function() {
-
+describe('mkdirp with umask', function () {
   var startingUmask;
-  before(function(done) {
+  before(function (done) {
     startingUmask = process.umask(parseInt('066', 8));
 
     done();
   });
 
-  after(function(done) {
+  after(function (done) {
     process.umask(startingUmask);
 
     done();
-  })
+  });
 
   // Initialize the normal suite
   suite();
