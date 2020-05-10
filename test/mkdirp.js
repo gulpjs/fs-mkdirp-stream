@@ -315,4 +315,13 @@ describe('mkdirp', function () {
       });
     });
   });
+
+  it('does what if dangling link', function(done) {
+    fs.symlinkSync('not-exist', outputDirpath);
+
+    mkdirp(outputDirpath, function(err) {
+      console.log(err);
+      done();
+    });
+  });
 });
