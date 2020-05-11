@@ -20,7 +20,7 @@ var mkdirpStream = require('fs-mkdirp-stream');
 from
   .obj([{ dirname: '/path/to/my/', path: '/path/to/my/file.js' }])
   .pipe(
-    mkdirpStream.obj(function (obj, callback) {
+    mkdirpStream(function (obj, callback) {
       // callback can take 3 arguments (err, dirname, mode)
       callback(null, obj.dirname);
     })
@@ -37,15 +37,11 @@ from
 
 ### `mkdirpStream(resolver)`
 
-Takes a `resolver` function or string and returns a `through2` stream.
+Takes a `resolver` function or string and returns a `streamx.Transform` stream.
 
 If the `resolver` is a function, it will be called once per chunk with the signature `(chunk, callback)`. The `callback(error, dirpath, mode)` must be called with the `dirpath` to be created as the 2nd parameter or an `error` as the 1st parameter; optionally with a `mode` as the 3rd parameter.
 
 If the `resolver` is a string, it will be created/ensured for each chunk (e.g. if it were deleted between chunks, it would be recreated). When using a string, a custom `mode` can't be used.
-
-### `mkdirpStream.obj(resolver)`
-
-The same as the top-level API but for object streams. See the example to see the benefit of object streams with this module.
 
 ## License
 

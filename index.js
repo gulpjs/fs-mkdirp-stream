@@ -1,8 +1,8 @@
 'use strict';
 
-var through = require('through2');
+const { Transform } = require('streamx');
 
-var mkdirp = require('./mkdirp');
+const mkdirp = require('./mkdirp');
 
 function toFunction(dirpath) {
   function stringResolver(chunk, callback) {
@@ -12,14 +12,14 @@ function toFunction(dirpath) {
   return stringResolver;
 }
 
-function define(options) {
-  function mkdirpStream(resolver) {
-    // Handle resolver that's just a dirpath
-    if (typeof resolver === 'string') {
-      resolver = toFunction(resolver);
-    }
+function mkdirpStream(resolver) {
+  // Handle resolver that's just a dirpath
+  if (typeof resolver === 'string') {
+    resolver = toFunction(resolver);
+  }
 
-    function makeFileDirs(chunk, enc, callback) {
+  return new Transform({
+    transform(chunk, callback) {
       resolver(chunk, onDirpath);
 
       function onDirpath(dirpathErr, dirpath, mode) {
@@ -37,13 +37,8 @@ function define(options) {
 
         callback(null, chunk);
       }
-    }
-
-    return through(options, makeFileDirs);
-  }
-
-  return mkdirpStream;
+    },
+  });
 }
 
-module.exports = define();
-module.exports.obj = define({ objectMode: true, highWaterMark: 16 });
+module.exports = mkdirpStream;
