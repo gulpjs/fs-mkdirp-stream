@@ -2,18 +2,17 @@
 
 var os = require('os');
 var path = require('path');
+var pipeline = require('stream').pipeline;
 
 var fs = require('graceful-fs');
-var miss = require('mississippi');
 var mock = require('jest-mock');
 var expect = require('expect');
 var rimraf = require('rimraf');
+var streamx = require('streamx');
+var Readable = streamx.Readable;
+var Writable = streamx.Writable;
 
 var mkdirpStream = require('../');
-
-var pipe = miss.pipe;
-var from = miss.from;
-var concat = miss.concat;
 
 describe('mkdirpStream', function () {
   var MASK_MODE = parseInt('7777', 8);
@@ -67,33 +66,34 @@ describe('mkdirpStream', function () {
     });
   });
 
-  it('exports a main function, .obj and .withMode methods', function (done) {
+  it('exports a main function', function (done) {
     expect(typeof mkdirpStream).toEqual('function');
-    expect(typeof mkdirpStream.obj).toEqual('function');
     done();
   });
 
   it('takes a string to create', function (done) {
-    function assert() {
+    function assert(err) {
       expect(statMode(outputDirpath)).toBeDefined();
+      done(err);
     }
 
-    pipe([from(['test']), mkdirpStream(outputDirpath), concat(assert)], done);
+    pipeline(Readable.from(['test']), mkdirpStream(outputDirpath), new Writable(), assert);
   });
 
   it('takes a resolver function that receives chunk', function (done) {
-    var expected = Buffer.from('test');
+    var expected = 'test';
 
     function resolver(chunk, cb) {
-      expect(chunk.equals(expected)).toEqual(true);
+      expect(chunk).toEqual(expected);
       cb(null, outputDirpath);
     }
 
-    function assert() {
+    function assert(err) {
       expect(statMode(outputDirpath)).toBeDefined();
+      done(err);
     }
 
-    pipe([from(['test']), mkdirpStream(resolver), concat(assert)], done);
+    pipeline(Readable.from(['test']), mkdirpStream(resolver), new Writable(), assert);
   });
 
   it('can pass a mode as the 3rd argument to the resolver callback', function (done) {
@@ -104,18 +104,19 @@ describe('mkdirpStream', function () {
 
     var mode = applyUmask('700');
 
-    var expected = Buffer.from('test');
+    var expected = 'test';
 
     function resolver(chunk, cb) {
-      expect(chunk.equals(expected)).toEqual(true);
+      expect(chunk).toEqual(expected);
       cb(null, outputDirpath, mode);
     }
 
-    function assert() {
+    function assert(err) {
       expect(statMode(outputDirpath)).toEqual(mode);
+      done(err);
     }
 
-    pipe([from(['test']), mkdirpStream(resolver), concat(assert)], done);
+    pipeline(Readable.from(['test']), mkdirpStream(resolver), new Writable(), assert);
   });
 
   it('can pass an error as the 1st argument to the resolver callback to error', function (done) {
@@ -133,7 +134,7 @@ describe('mkdirpStream', function () {
       done();
     }
 
-    pipe([from(['test']), mkdirpStream(resolver), concat()], assert);
+    pipeline(Readable.from(['test']), mkdirpStream(resolver), new Writable(), assert);
   });
 
   it('works with objectMode', function (done) {
@@ -143,17 +144,16 @@ describe('mkdirpStream', function () {
       cb(null, chunk.dirname);
     }
 
-    function assert() {
+    function assert(err) {
       expect(statMode(outputDirpath)).toBeDefined();
+      done(err);
     }
 
-    pipe(
-      [
-        from.obj([{ dirname: outputDirpath }]),
-        mkdirpStream.obj(resolver),
-        concat(assert),
-      ],
-      done
+    pipeline(
+      Readable.from([{ dirname: outputDirpath }]),
+      mkdirpStream(resolver),
+      new Writable(),
+      assert
     );
   });
 
@@ -172,6 +172,6 @@ describe('mkdirpStream', function () {
       done();
     }
 
-    pipe([from(['test']), mkdirpStream(outputDirpath), concat()], assert);
+    pipeline(Readable.from(['test']), mkdirpStream(outputDirpath), new Writable(), assert);
   });
 });
