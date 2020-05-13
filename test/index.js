@@ -2,13 +2,13 @@
 
 var os = require('os');
 var path = require('path');
-var {pipeline} = require('stream');
+var pipeline = require('stream').pipeline;
 
 var fs = require('graceful-fs');
 var mock = require('jest-mock');
 var expect = require('expect');
 var rimraf = require('rimraf');
-var {Readable} = require('streamx');
+var Readable = require('streamx').Readable;
 
 var mkdirpStream = require('../');
 

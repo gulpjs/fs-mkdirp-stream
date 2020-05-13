@@ -1,8 +1,8 @@
 'use strict';
 
-const { Transform } = require('streamx');
+var Transform = require('streamx').Transform;
 
-const mkdirp = require('./mkdirp');
+var mkdirp = require('./mkdirp');
 
 function toFunction(dirpath) {
   function stringResolver(chunk, callback) {
@@ -19,7 +19,7 @@ function mkdirpStream(resolver) {
   }
 
   return new Transform({
-    transform(chunk, callback) {
+    transform: function (chunk, callback) {
       resolver(chunk, onDirpath);
 
       function onDirpath(dirpathErr, dirpath, mode) {
