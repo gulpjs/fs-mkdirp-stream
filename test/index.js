@@ -8,7 +8,9 @@ var fs = require('graceful-fs');
 var mock = require('jest-mock');
 var expect = require('expect');
 var rimraf = require('rimraf');
-var Readable = require('streamx').Readable;
+var streamx = require('streamx');
+var Readable = streamx.Readable;
+var Writable = streamx.Writable;
 
 var mkdirpStream = require('../');
 
@@ -75,7 +77,7 @@ describe('mkdirpStream', function () {
       done(err);
     }
 
-    pipeline(Readable.from(['test']), mkdirpStream(outputDirpath), assert);
+    pipeline(Readable.from(['test']), mkdirpStream(outputDirpath), new Writable(), assert);
   });
 
   it('takes a resolver function that receives chunk', function (done) {
@@ -91,7 +93,7 @@ describe('mkdirpStream', function () {
       done(err);
     }
 
-    pipeline(Readable.from(['test']), mkdirpStream(resolver), assert);
+    pipeline(Readable.from(['test']), mkdirpStream(resolver), new Writable(), assert);
   });
 
   it('can pass a mode as the 3rd argument to the resolver callback', function (done) {
@@ -114,7 +116,7 @@ describe('mkdirpStream', function () {
       done(err);
     }
 
-    pipeline(Readable.from(['test']), mkdirpStream(resolver), assert);
+    pipeline(Readable.from(['test']), mkdirpStream(resolver), new Writable(), assert);
   });
 
   it('can pass an error as the 1st argument to the resolver callback to error', function (done) {
@@ -132,7 +134,7 @@ describe('mkdirpStream', function () {
       done();
     }
 
-    pipeline(Readable.from(['test']), mkdirpStream(resolver), assert);
+    pipeline(Readable.from(['test']), mkdirpStream(resolver), new Writable(), assert);
   });
 
   it('works with objectMode', function (done) {
@@ -150,6 +152,7 @@ describe('mkdirpStream', function () {
     pipeline(
       Readable.from([{ dirname: outputDirpath }]),
       mkdirpStream(resolver),
+      new Writable(),
       assert
     );
   });
@@ -169,6 +172,6 @@ describe('mkdirpStream', function () {
       done();
     }
 
-    pipeline(Readable.from(['test']), mkdirpStream(outputDirpath), assert);
+    pipeline(Readable.from(['test']), mkdirpStream(outputDirpath), new Writable(), assert);
   });
 });
