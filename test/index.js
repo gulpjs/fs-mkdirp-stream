@@ -24,8 +24,6 @@ describe('mkdirpStream', function () {
   function cleanup(done) {
     this.timeout(20000);
 
-    mock.restoreAllMocks();
-
     // Async del to get sort-of-fix for https://github.com/isaacs/rimraf/issues/72
     rimraf(outputBase, done);
   }
@@ -189,6 +187,7 @@ describe('mkdirpStream', function () {
     function assert(err) {
       expect(err).toBeDefined();
       expect(notExists).toThrow();
+      fs.mkdir.mockRestore();
       done();
     }
 

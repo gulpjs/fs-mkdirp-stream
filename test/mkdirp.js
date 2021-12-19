@@ -37,8 +37,6 @@ function suite() {
   function cleanup(done) {
     this.timeout(20000);
 
-    mock.restoreAllMocks();
-
     // Async del to get sort-of-fix for https://github.com/isaacs/rimraf/issues/72
     rimraf(outputBase, done);
   }
@@ -333,6 +331,7 @@ function suite() {
     mkdirp(outputNestedDirpath, function (err) {
       expect(err).toBeDefined();
 
+      fs.mkdir.mockRestore();
       done();
     });
   });
@@ -345,6 +344,7 @@ function suite() {
     mkdirp(outputDirpath, function (err) {
       expect(err).toBeDefined();
 
+      fs.stat.mockRestore();
       done();
     });
   });
@@ -366,6 +366,7 @@ function suite() {
         expect(err).toBeFalsy();
         expect(spy).toHaveBeenCalledTimes(0);
 
+        fs.chmod.mockRestore();
         done();
       });
     });
