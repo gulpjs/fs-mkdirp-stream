@@ -5,7 +5,7 @@ var path = require('path');
 var pipeline = require('stream').pipeline;
 
 var fs = require('graceful-fs');
-var mock = require('jest-mock');
+var sinon = require('sinon');
 var expect = require('expect');
 var rimraf = require('rimraf');
 var streamx = require('streamx');
@@ -176,7 +176,7 @@ describe('mkdirpStream', function () {
   });
 
   it('bubbles mkdir errors', function (done) {
-    mock.spyOn(fs, 'mkdir').mockImplementation(function (dirpath, mode, cb) {
+    sinon.stub(fs, 'mkdir').callsFake(function (dirpath, mode, cb) {
       cb(new Error('boom'));
     });
 
@@ -187,7 +187,7 @@ describe('mkdirpStream', function () {
     function assert(err) {
       expect(err).toBeDefined();
       expect(notExists).toThrow();
-      fs.mkdir.mockRestore();
+      fs.mkdir.restore();
       done();
     }
 

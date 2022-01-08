@@ -4,7 +4,7 @@ var os = require('os');
 var path = require('path');
 
 var fs = require('graceful-fs');
-var mock = require('jest-mock');
+var sinon = require('sinon');
 var expect = require('expect');
 var rimraf = require('rimraf');
 
@@ -319,10 +319,10 @@ function suite() {
   it('surfaces mkdir errors that happening during recursion', function (done) {
     var ogMkdir = fs.mkdir;
 
-    var spy = mock
-      .spyOn(fs, 'mkdir')
-      .mockImplementation(function (dirpath, mode, cb) {
-        if (spy.mock.calls.length === 1) {
+    var stub = sinon
+      .stub(fs, 'mkdir')
+      .callsFake(function (dirpath, mode, cb) {
+        if (stub.callCount === 1) {
           return ogMkdir(dirpath, mode, cb);
         }
         cb(new Error('boom'));
@@ -331,20 +331,20 @@ function suite() {
     mkdirp(outputNestedDirpath, function (err) {
       expect(err).toBeDefined();
 
-      fs.mkdir.mockRestore();
+      fs.mkdir.restore();
       done();
     });
   });
 
   it('surfaces fs.stat errors', function (done) {
-    mock.spyOn(fs, 'stat').mockImplementation(function (dirpath, cb) {
+    sinon.stub(fs, 'stat').callsFake(function (dirpath, cb) {
       cb(new Error('boom'));
     });
 
     mkdirp(outputDirpath, function (err) {
       expect(err).toBeDefined();
 
-      fs.stat.mockRestore();
+      fs.stat.restore();
       done();
     });
   });
@@ -360,13 +360,13 @@ function suite() {
     mkdirp(outputDirpath, mode, function (err) {
       expect(err).toBeFalsy();
 
-      var spy = mock.spyOn(fs, 'chmod');
+      var spy = sinon.spy(fs, 'chmod');
 
       mkdirp(outputDirpath, mode, function (err) {
         expect(err).toBeFalsy();
-        expect(spy).toHaveBeenCalledTimes(0);
+        expect(spy.callCount).toEqual(0);
 
-        fs.chmod.mockRestore();
+        fs.chmod.restore();
         done();
       });
     });
