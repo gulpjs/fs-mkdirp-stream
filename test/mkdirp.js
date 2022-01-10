@@ -319,14 +319,12 @@ function suite() {
   it('surfaces mkdir errors that happening during recursion', function (done) {
     var ogMkdir = fs.mkdir;
 
-    var stub = sinon
-      .stub(fs, 'mkdir')
-      .callsFake(function (dirpath, mode, cb) {
-        if (stub.callCount === 1) {
-          return ogMkdir(dirpath, mode, cb);
-        }
-        cb(new Error('boom'));
-      });
+    var stub = sinon.stub(fs, 'mkdir').callsFake(function (dirpath, mode, cb) {
+      if (stub.callCount === 1) {
+        return ogMkdir(dirpath, mode, cb);
+      }
+      cb(new Error('boom'));
+    });
 
     mkdirp(outputNestedDirpath, function (err) {
       expect(err).toBeDefined();
