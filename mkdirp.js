@@ -106,8 +106,9 @@ function mkdirp(dirpath, mode, callback) {
         return fs.readlink(dirpath, onReadlink);
       }
 
-      // Trying to opendir will surface the ENOTDIR we want
-      fs.opendir(dirpath, callback);
+      // Trying to readdir will surface the ENOTDIR we want
+      // TODO: Use `opendir` when we support node >12
+      fs.readdir(dirpath, callback);
     }
 
     function onReadlink(err, link) {
@@ -116,8 +117,9 @@ function mkdirp(dirpath, mode, callback) {
         return callback(mkdirErr);
       }
 
-      // Trying to opendir will surface the ENOTDIR we want
-      fs.opendir(link, callback);
+      // Trying to readdir will surface the ENOTDIR we want
+      // TODO: Use `opendir` when we support node >12
+      fs.readdir(link, callback);
     }
   }
 
