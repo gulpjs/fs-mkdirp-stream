@@ -395,10 +395,12 @@ function suite() {
   });
 
   describe('symlinks', function () {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
+    before(function () {
+      if (isWindows) {
+        this.skip();
+        return;
+      }
+    });
 
     it('succeeds with a directory at the target of a symlink', function (done) {
       var target = path.join(outputBase, 'target');
