@@ -259,7 +259,7 @@ function suite() {
 
     var mode = '777';
 
-    mkdirp(outputDirpath, function (err) {
+    fs.mkdir(outputDirpath, function (err) {
       expect(err).toBeFalsy();
       expect(createdMode(outputDirpath)).toEqual(expectedDefaultMode());
 
@@ -272,8 +272,8 @@ function suite() {
     });
   });
 
-  it('errors with EEXIST if file in path', function (done) {
-    mkdirp(outputDirpath, function (err) {
+  it('errors with ENOTDIR if file in path', function (done) {
+    fs.mkdir(outputDirpath, function (err) {
       expect(err).toBeFalsy();
 
       fs.writeFile(outputNestedPath, contents, function (err2) {
@@ -281,7 +281,28 @@ function suite() {
 
         mkdirp(outputNestedPath, function (err3) {
           expect(err3).toBeDefined();
-          expect(err3.code).toEqual('EEXIST');
+          expect(err3.code).toEqual('ENOTDIR');
+          expect(err3.path).toEqual(outputNestedPath);
+
+          done();
+        });
+      });
+    });
+  });
+
+  it('errors with ENOTDIR if file in path of nested mkdirp', function (done) {
+    var nestedPastFile = path.join(outputNestedPath, './bar/baz/');
+
+    fs.mkdir(outputDirpath, function (err) {
+      expect(err).toBeFalsy();
+
+      fs.writeFile(outputNestedPath, contents, function (err2) {
+        expect(err2).toBeFalsy();
+
+        mkdirp(nestedPastFile, function (err3) {
+          expect(err3).toBeDefined();
+          expect(err3.code).toEqual('ENOTDIR');
+          expect(err3.path).toEqual(outputNestedPath);
 
           done();
         });
@@ -297,7 +318,7 @@ function suite() {
 
     var mode = '777';
 
-    mkdirp(outputDirpath, function (err) {
+    fs.mkdir(outputDirpath, function (err) {
       expect(err).toBeFalsy();
 
       fs.writeFile(outputNestedPath, contents, function (err2) {
@@ -327,9 +348,10 @@ function suite() {
     });
 
     mkdirp(outputNestedDirpath, function (err) {
+      fs.mkdir.restore();
+
       expect(err).toBeDefined();
 
-      fs.mkdir.restore();
       done();
     });
   });
@@ -340,9 +362,10 @@ function suite() {
     });
 
     mkdirp(outputDirpath, function (err) {
+      fs.stat.restore();
+
       expect(err).toBeDefined();
 
-      fs.stat.restore();
       done();
     });
   });
@@ -361,11 +384,189 @@ function suite() {
       var spy = sinon.spy(fs, 'chmod');
 
       mkdirp(outputDirpath, mode, function (err) {
+        fs.chmod.restore();
+
         expect(err).toBeFalsy();
         expect(spy.callCount).toEqual(0);
 
-        fs.chmod.restore();
         done();
+      });
+    });
+  });
+
+  describe('symlinks', function () {
+    before(function () {
+      if (isWindows) {
+        this.skip();
+        return;
+      }
+    });
+
+    it('succeeds with a directory at the target of a symlink', function (done) {
+      var target = path.join(outputBase, 'target');
+
+      fs.mkdir(target, function (err) {
+        expect(err).toBeFalsy();
+
+        fs.symlink(target, outputDirpath, function (err) {
+          expect(err).toBeFalsy();
+
+          mkdirp(outputDirpath, function (err) {
+            expect(err).toBeFalsy();
+            expect(createdMode(target)).toBeDefined();
+
+            done();
+          });
+        });
+      });
+    });
+
+    it('changes mode of existing directory at the target of a symlink', function (done) {
+      var target = path.join(outputBase, 'target');
+
+      var mode = '777';
+
+      fs.mkdir(target, function (err) {
+        expect(err).toBeFalsy();
+
+        fs.symlink(target, outputDirpath, function (err2) {
+          expect(err2).toBeFalsy();
+          expect(createdMode(target)).toEqual(expectedDefaultMode());
+
+          mkdirp(outputDirpath, mode, function (err3) {
+            expect(err3).toBeFalsy();
+            expect(createdMode(target)).toEqual(expectedMode(mode));
+            done();
+          });
+        });
+      });
+    });
+
+    it('creates nested directories at the target of a symlink', function (done) {
+      var target = path.join(outputBase, 'target');
+      var expected = path.join(target, './bar/baz/');
+
+      fs.mkdir(target, function (err) {
+        expect(err).toBeFalsy();
+
+        fs.symlink(target, outputDirpath, function (err2) {
+          expect(err2).toBeFalsy();
+
+          mkdirp(outputNestedDirpath, function (err3) {
+            expect(err3).toBeFalsy();
+            expect(createdMode(expected)).toBeDefined();
+            done();
+          });
+        });
+      });
+    });
+
+    it('errors with ENOTDIR if the target of a symlink is a file', function (done) {
+      var target = path.join(outputBase, 'test.txt');
+
+      fs.mkdir(outputDirpath, function (err) {
+        expect(err).toBeFalsy();
+
+        fs.writeFile(target, contents, function (err2) {
+          expect(err2).toBeFalsy();
+
+          fs.symlink(target, outputNestedPath, function (err3) {
+            expect(err3).toBeFalsy();
+
+            mkdirp(outputNestedPath, function (err4) {
+              expect(err4).toBeDefined();
+              expect(err4.code).toEqual('ENOTDIR');
+              expect(err4.path).toEqual(target);
+              done();
+            });
+          });
+        });
+      });
+    });
+
+    it('errors with ENOTDIR if the target of a symlink is a file in a nested mkdirp', function (done) {
+      var target = path.join(outputBase, 'test.txt');
+
+      fs.writeFile(target, contents, function (err) {
+        expect(err).toBeFalsy();
+
+        fs.symlink(target, outputDirpath, function (err2) {
+          expect(err2).toBeFalsy();
+
+          mkdirp(outputNestedDirpath, function (err3) {
+            expect(err3).toBeDefined();
+            expect(err3.code).toEqual('ENOTDIR');
+            expect(err3.path).toEqual(target);
+            done();
+          });
+        });
+      });
+    });
+
+    it('errors with ENOENT if the target of a symlink is missing (a.k.a. dangling symlink)', function (done) {
+      var target = path.join(outputBase, 'dangling-link');
+
+      fs.symlink(target, outputDirpath, function (err) {
+        expect(err).toBeFalsy();
+
+        mkdirp(outputDirpath, function (err2) {
+          expect(err2).toBeDefined();
+          expect(err2.code).toEqual('ENOENT');
+          expect(err2.path).toEqual(target);
+          done();
+        });
+      });
+    });
+
+    it('properly surfaces top-level error if lstat fails', function (done) {
+      var target = path.join(outputBase, 'test.txt');
+
+      sinon.stub(fs, 'lstat').callsFake(function (dirpath, cb) {
+        cb(new Error('boom'));
+      });
+
+      fs.mkdir(outputDirpath, function (err) {
+        expect(err).toBeFalsy();
+
+        fs.writeFile(target, contents, function (err2) {
+          expect(err2).toBeFalsy();
+
+          fs.symlink(target, outputNestedPath, function (err3) {
+            expect(err3).toBeFalsy();
+
+            mkdirp(outputNestedPath, function (err4) {
+              fs.lstat.restore();
+
+              expect(err4).toBeDefined();
+              expect(err4.code).toEqual('EEXIST');
+              expect(err4.path).toEqual(outputNestedPath);
+
+              done();
+            });
+          });
+        });
+      });
+    });
+
+    it('properly surfaces top-level error if readlink fails', function (done) {
+      var target = path.join(outputBase, 'target');
+
+      sinon.stub(fs, 'readlink').callsFake(function (dirpath, cb) {
+        cb(new Error('boom'));
+      });
+
+      fs.symlink(target, outputDirpath, function (err) {
+        expect(err).toBeFalsy();
+
+        mkdirp(outputDirpath, function (err2) {
+          fs.readlink.restore();
+
+          expect(err2).toBeDefined();
+          expect(err2.code).toEqual('EEXIST');
+          expect(err2.path).toEqual(outputDirpath);
+
+          done();
+        });
       });
     });
   });
