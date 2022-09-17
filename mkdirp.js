@@ -93,7 +93,15 @@ function mkdirp(dirpath, mode, callback) {
         return callback();
       }
 
-      fs.chmod(dirpath, mode, callback);
+      fs.chmod(dirpath, mode, onChmod);
+    }
+
+    function onChmod(chmodErr) {
+      if (chmodErr && chmodErr.code !== 'ENOSUP') {
+        return callback(chmodErr);
+      }
+
+      callback();
     }
 
     function onNonDirectory(err, dirpath, stats) {

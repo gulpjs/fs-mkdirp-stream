@@ -272,6 +272,40 @@ function suite() {
     });
   });
 
+  it('surfaces chmod errors', function (done) {
+    sinon.stub(fs, 'chmod').callsFake(function (p, mode, cb) {
+      cb(new Error('boom'));
+    });
+
+    var mode = '777';
+
+    mkdirp(outputDirpath, mode, function (err) {
+      fs.chmod.restore();
+
+      expect(err).toBeDefined();
+
+      done();
+    });
+  });
+
+  it('does not surface error ENOSUP if chmod is unsupported on the path', function (done) {
+    sinon.stub(fs, 'chmod').callsFake(function (p, mode, cb) {
+      var err = new Error('boom');
+      err.code = 'ENOSUP';
+      cb(err);
+    });
+
+    var mode = '777';
+
+    mkdirp(outputDirpath, mode, function (err) {
+      fs.chmod.restore();
+
+      expect(err).not.toBeDefined();
+
+      done();
+    });
+  });
+
   it('errors with ENOTDIR if file in path', function (done) {
     fs.mkdir(outputDirpath, function (err) {
       expect(err).toBeFalsy();
