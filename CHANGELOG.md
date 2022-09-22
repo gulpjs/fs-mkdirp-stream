@@ -1,5 +1,12 @@
 # Changelog
 
+### [2.0.1](https://www.github.com/gulpjs/fs-mkdirp-stream/compare/v2.0.0...v2.0.1) (2022-09-17)
+
+
+### Bug Fixes
+
+* Continue upon ENOSUP chmod failures ([#19](https://www.github.com/gulpjs/fs-mkdirp-stream/issues/19)) ([b63196c](https://www.github.com/gulpjs/fs-mkdirp-stream/commit/b63196cea9a2c201f61ce6c449aac5199ab52676))
+
 ## [2.0.0](https://www.github.com/gulpjs/fs-mkdirp-stream/compare/v1.0.0...v2.0.0) (2022-08-30)
 
 
