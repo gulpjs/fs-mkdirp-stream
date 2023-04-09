@@ -56,7 +56,7 @@ Contains a custom implementation of `mkdirp` originally based on https://github.
 [npm-image]: https://img.shields.io/npm/v/fs-mkdirp-stream.svg?style=flat-square
 
 [ci-url]: https://github.com/gulpjs/fs-mkdirp-stream/actions?query=workflow:dev
-[ci-image]: https://img.shields.io/github/workflow/status/gulpjs/fs-mkdirp-stream/dev?style=flat-square
+[ci-image]: https://img.shields.io/github/actions/workflow/status/gulpjs/fs-mkdirp-stream/dev.yml?branch=master&style=flat-square
 
 [coveralls-url]: https://coveralls.io/r/gulpjs/fs-mkdirp-stream
 [coveralls-image]: https://img.shields.io/coveralls/gulpjs/fs-mkdirp-stream/master.svg?style=flat-square
