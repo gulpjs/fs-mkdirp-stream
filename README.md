@@ -13,15 +13,15 @@ Ensure directories exist before writing to them.
 ## Usage
 
 ```js
-var { Readable, Writable } = require('streamx');
-var mkdirpStream = require('fs-mkdirp-stream');
+var { Readable, Writable } = require("streamx");
+var mkdirpStream = require("fs-mkdirp-stream");
 
-Readable.from([{ dirname: './path/to/my/', path: './path/to/my/file.js' }])
+Readable.from([{ dirname: "./path/to/my/", path: "./path/to/my/file.js" }])
   .pipe(
     mkdirpStream(function (obj, callback) {
       // callback can take 3 arguments (err, dirname, mode)
       callback(null, obj.dirname);
-    })
+    }),
   )
   .pipe(
     new Writable({
@@ -30,7 +30,7 @@ Readable.from([{ dirname: './path/to/my/', path: './path/to/my/file.js' }])
         // obj === { dirname: '/path/to/my/', path: '/path/to/my/file.js' }
         cb();
       },
-    })
+    }),
   );
 ```
 

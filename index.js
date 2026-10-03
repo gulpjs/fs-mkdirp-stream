@@ -1,8 +1,8 @@
-'use strict';
+"use strict";
 
-var Transform = require('streamx').Transform;
+var Transform = require("streamx").Transform;
 
-var mkdirp = require('./mkdirp');
+var mkdirp = require("./mkdirp");
 
 function toFunction(dirpath) {
   function stringResolver(chunk, callback) {
@@ -14,7 +14,7 @@ function toFunction(dirpath) {
 
 function mkdirpStream(resolver) {
   // Handle resolver that's just a dirpath
-  if (typeof resolver === 'string') {
+  if (typeof resolver === "string") {
     resolver = toFunction(resolver);
   }
 

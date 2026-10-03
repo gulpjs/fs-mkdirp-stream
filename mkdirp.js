@@ -1,10 +1,10 @@
-'use strict';
+"use strict";
 
-var path = require('path');
+var path = require("path");
 
-var fs = require('graceful-fs');
+var fs = require("graceful-fs");
 
-var MASK_MODE = parseInt('7777', 8);
+var MASK_MODE = parseInt("7777", 8);
 
 // Utility for passing dirpath that was used with `fs.stat`
 function stat(dirpath, cb) {
@@ -25,12 +25,12 @@ function lstat(dirpath, cb) {
 }
 
 function mkdirp(dirpath, mode, callback) {
-  if (typeof mode === 'function') {
+  if (typeof mode === "function") {
     callback = mode;
     mode = undefined;
   }
 
-  if (typeof mode === 'string') {
+  if (typeof mode === "string") {
     mode = parseInt(mode, 8);
   }
 
@@ -44,15 +44,15 @@ function mkdirp(dirpath, mode, callback) {
     }
 
     switch (mkdirErr.code) {
-      case 'ENOENT': {
+      case "ENOENT": {
         return mkdirp(path.dirname(dirpath), onRecurse);
       }
 
-      case 'EEXIST': {
+      case "EEXIST": {
         return stat(dirpath, onStat);
       }
 
-      case 'ENOTDIR': {
+      case "ENOTDIR": {
         // On ENOTDIR, this will traverse up the tree until it finds something it can stat
         return stat(dirpath, onErrorRecurse);
       }
@@ -74,7 +74,7 @@ function mkdirp(dirpath, mode, callback) {
       if (statErr) {
         // If we have ENOENT here it might be a symlink,
         // so we need to recurse to error with the target file name
-        if (statErr.code === 'ENOENT') {
+        if (statErr.code === "ENOENT") {
           return lstat(dirpath, onStat);
         }
 
@@ -97,7 +97,7 @@ function mkdirp(dirpath, mode, callback) {
     }
 
     function onChmod(chmodErr) {
-      if (chmodErr && chmodErr.code !== 'ENOSUP') {
+      if (chmodErr && chmodErr.code !== "ENOSUP") {
         return callback(chmodErr);
       }
 
