@@ -44,6 +44,16 @@ If the `resolver` is a function, it will be called once per chunk with the signa
 
 If the `resolver` is a string, it will be created/ensured for each chunk (e.g. if it were deleted between chunks, it would be recreated). When using a string, a custom `mode` can't be used.
 
+## Strict No LLM / No AI Policy
+
+No LLMs for issues.
+
+No LLMs for patches / pull requests.
+
+No LLMs for comments on the bug tracker, including translation.
+
+English is encouraged, but not required. You are welcome to post in your native language and rely on others to have their own translation tools of choice to interpret your words.
+
 ## License
 
 MIT
@@ -55,9 +65,9 @@ Contains a custom implementation of `mkdirp` originally based on https://github.
 [npm-url]: https://www.npmjs.com/package/fs-mkdirp-stream
 [npm-image]: https://img.shields.io/npm/v/fs-mkdirp-stream.svg?style=flat-square
 
-[ci-url]: https://github.com/gulpjs/fs-mkdirp-stream/actions?query=workflow:dev
-[ci-image]: https://img.shields.io/github/actions/workflow/status/gulpjs/fs-mkdirp-stream/dev.yml?branch=master&style=flat-square
+[ci-url]: https://github.com/gulpjs/fs-mkdirp-stream/actions/workflows/dev.yml
+[ci-image]: https://img.shields.io/github/actions/workflow/status/gulpjs/fs-mkdirp-stream/dev.yml?style=flat-square
 
 [coveralls-url]: https://coveralls.io/r/gulpjs/fs-mkdirp-stream
-[coveralls-image]: https://img.shields.io/coveralls/gulpjs/fs-mkdirp-stream/master.svg?style=flat-square
+[coveralls-image]: https://img.shields.io/coveralls/gulpjs/fs-mkdirp-stream/main.svg?style=flat-square
 <!-- prettier-ignore-end -->
