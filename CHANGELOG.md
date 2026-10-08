@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://github.com/gulpjs/fs-mkdirp-stream/compare/v2.0.1...v3.0.0) (2026-10-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* Normalize repository, dropping Node <22.15.0 ([#23](https://github.com/gulpjs/fs-mkdirp-stream/issues/23))
+
+### Miscellaneous Chores
+
+* Normalize repository, dropping Node &lt;22.15.0 ([#23](https://github.com/gulpjs/fs-mkdirp-stream/issues/23)) ([cc28cd0](https://github.com/gulpjs/fs-mkdirp-stream/commit/cc28cd05547a3d22bcfdebb9cdcfb1078c9cbb22))
+
 ### [2.0.1](https://www.github.com/gulpjs/fs-mkdirp-stream/compare/v2.0.0...v2.0.1) (2022-09-17)
 
 
