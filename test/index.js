@@ -33,7 +33,7 @@ function suite(moduleName) {
     var outputBase = path.join(__dirname, "./out-fixtures");
     var outputDirpath = path.join(outputBase, "./foo");
 
-    function cleanup(done) {
+    function cleanup(t, done) {
       // Async del to get sort-of-fix for https://github.com/isaacs/rimraf/issues/72
       rimraf(outputBase, done);
     }
@@ -59,7 +59,7 @@ function suite(moduleName) {
       return mode & ~current;
     }
 
-    beforeEach((t, done) => cleanup(done), { timeout: 10000 });
+    beforeEach(cleanup, { timeout: 10000 });
 
     beforeEach(function (t, done) {
       fs.mkdir(outputBase, function (err) {
@@ -72,7 +72,7 @@ function suite(moduleName) {
       });
     });
 
-    afterEach((t, done) => cleanup(done), { timeout: 10000 });
+    afterEach(cleanup, { timeout: 10000 });
 
     it("exports a main function", function () {
       assert.strictEqual(typeof mkdirpStream, "function");

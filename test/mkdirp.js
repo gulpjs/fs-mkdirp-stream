@@ -41,7 +41,7 @@ function suite() {
   var outputNestedDirpath = path.join(outputDirpath, "./bar/baz/");
   var contents = "Hello World!\n";
 
-  function cleanup(done) {
+  function cleanup(t, done) {
     // Async del to get sort-of-fix for https://github.com/isaacs/rimraf/issues/72
     rimraf(outputBase, done);
   }
@@ -76,7 +76,7 @@ function suite() {
     return mode;
   }
 
-  beforeEach((t, done) => cleanup(done), { timeout: 10000 });
+  beforeEach(cleanup, { timeout: 10000 });
   beforeEach(function (t, done) {
     fs.mkdir(outputBase, function (err) {
       if (err) {
@@ -88,7 +88,7 @@ function suite() {
     });
   });
 
-  afterEach((t, done) => cleanup(done), { timeout: 10000 });
+  afterEach(cleanup, { timeout: 10000 });
 
   it("makes a single directory", function (t, done) {
     mkdirp(outputDirpath, function (err) {
