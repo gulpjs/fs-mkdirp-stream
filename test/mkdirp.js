@@ -429,7 +429,7 @@ function suite() {
       mkdirp(outputDirpath, mode, function (err) {
         assert.ok(!err);
 
-        var spy = t.mock.fn(fs, "chmod");
+        var spy = t.mock.method(fs, "chmod");
 
         mkdirp(outputDirpath, mode, function (err) {
           assert.ok(!err);
@@ -558,57 +558,53 @@ function suite() {
       });
     });
 
-    // it("properly surfaces top-level error if lstat fails", function (t, done) {
-    //   var target = path.join(outputBase, "test.txt");
+    it("properly surfaces top-level error if lstat fails", function (t, done) {
+      var target = path.join(outputBase, "test.txt");
 
-    //   sinon.stub(fs, "lstat").callsFake(function (dirpath, cb) {
-    //     cb(new Error("boom"));
-    //   });
+      t.mock.method(fs, "lstat", (dirpath, cb) => {
+        cb(new Error("boom"));
+      });
 
-    //   fs.mkdir(outputDirpath, function (err) {
-    //     assert.ok(!err);
+      fs.mkdir(outputDirpath, function (err) {
+        assert.ok(!err);
 
-    //     fs.writeFile(target, contents, function (err2) {
-    //       assert.ok(!err2);
+        fs.writeFile(target, contents, function (err2) {
+          assert.ok(!err2);
 
-    //       fs.symlink(target, outputNestedPath, function (err3) {
-    //         expect(err3).toBeFalsy();
+          fs.symlink(target, outputNestedPath, function (err3) {
+            assert.ok(!err3);
 
-    //         mkdirp(outputNestedPath, function (err4) {
-    //           fs.lstat.restore();
+            mkdirp(outputNestedPath, function (err4) {
+              assert.ok(err4);
+              assert.strictEqual(err4.code, "EEXIST");
+              assert.strictEqual(err4.path, outputNestedPath);
 
-    //           expect(err4).toBeDefined();
-    //           expect(err4.code, "EEXIST");
-    //           expect(err4.path, outputNestedPath);
+              done();
+            });
+          });
+        });
+      });
+    });
 
-    //           done();
-    //         });
-    //       });
-    //     });
-    //   });
-    // });
+    it("properly surfaces top-level error if readlink fails", function (t, done) {
+      var target = path.join(outputBase, "target");
 
-    // it("properly surfaces top-level error if readlink fails", function (done) {
-    //   var target = path.join(outputBase, "target");
+      t.mock.method(fs, "readlink", (dirpath, cb) => {
+        cb(new Error("boom"));
+      });
 
-    //   sinon.stub(fs, "readlink").callsFake(function (dirpath, cb) {
-    //     cb(new Error("boom"));
-    //   });
+      fs.symlink(target, outputDirpath, function (err) {
+        assert.ok(!err);
 
-    //   fs.symlink(target, outputDirpath, function (err) {
-    //     assert.ok(!err);
+        mkdirp(outputDirpath, function (err2) {
+          assert.ok(err2);
+          assert.strictEqual(err2.code, "EEXIST");
+          assert.strictEqual(err2.path, outputDirpath);
 
-    //     mkdirp(outputDirpath, function (err2) {
-    //       fs.readlink.restore();
-
-    //       expect(err2).toBeDefined();
-    //       expect(err2.code, "EEXIST");
-    //       expect(err2.path, outputDirpath);
-
-    //       done();
-    //     });
-    //   });
-    // });
+          done();
+        });
+      });
+    });
   });
 }
 
