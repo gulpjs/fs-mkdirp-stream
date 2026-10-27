@@ -77,8 +77,6 @@ function suite() {
   }
 
   beforeEach((t, done) => cleanup(done), { timeout: 10000 });
-  afterEach((t, done) => cleanup(done), { timeout: 10000 });
-
   beforeEach(function (t, done) {
     fs.mkdir(outputBase, function (err) {
       if (err) {
@@ -89,6 +87,8 @@ function suite() {
       fs.chmod(outputBase, "777", done);
     });
   });
+
+  afterEach((t, done) => cleanup(done), { timeout: 10000 });
 
   it("makes a single directory", function (t, done) {
     mkdirp(outputDirpath, function (err) {
