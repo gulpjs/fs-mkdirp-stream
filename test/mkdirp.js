@@ -99,19 +99,18 @@ function suite() {
     });
   });
 
-  it("makes single directory w/ default mode", function (t, done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
+  it(
+    "makes single directory w/ default mode",
+    { skip: isWindows },
+    function (t, done) {
+      mkdirp(outputDirpath, function (err) {
+        assert.ok(!err);
+        assert.strictEqual(createdMode(outputDirpath), expectedDefaultMode());
 
-    mkdirp(outputDirpath, function (err) {
-      assert.ok(!err);
-      assert.strictEqual(createdMode(outputDirpath), expectedDefaultMode());
-
-      done();
-    });
-  });
+        done();
+      });
+    },
+  );
 
   it("makes multiple directories", function (t, done) {
     mkdirp(outputNestedDirpath, function (err) {

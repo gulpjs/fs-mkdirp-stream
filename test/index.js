@@ -109,31 +109,30 @@ function suite(moduleName) {
       );
     });
 
-    it("can pass a mode as the 3rd argument to the resolver callback", function (t, done) {
-      if (isWindows) {
-        this.skip();
-        return;
-      }
+    it(
+      "can pass a mode as the 3rd argument to the resolver callback",
+      { skip: isWindows },
+      function (t, done) {
+        var mode = applyUmask("700");
 
-      var mode = applyUmask("700");
+        var expected = "test";
 
-      var expected = "test";
+        function resolver(chunk, cb) {
+          assert.strictEqual(chunk, expected);
+          cb(null, outputDirpath, mode);
+        }
 
-      function resolver(chunk, cb) {
-        assert.strictEqual(chunk, expected);
-        cb(null, outputDirpath, mode);
-      }
+        function assertion(err) {
+          assert.strictEqual(statMode(outputDirpath), mode);
+          done(err);
+        }
 
-      function assertion(err) {
-        assert.strictEqual(statMode(outputDirpath), mode);
-        done(err);
-      }
-
-      stream.pipeline(
-        [stream.Readable.from(["test"]), mkdirpStream(resolver), sink()],
-        assertion,
-      );
-    });
+        stream.pipeline(
+          [stream.Readable.from(["test"]), mkdirpStream(resolver), sink()],
+          assertion,
+        );
+      },
+    );
 
     it("can pass an error as the 1st argument to the resolver callback to error", function (t, done) {
       function resolver(chunk, cb) {
