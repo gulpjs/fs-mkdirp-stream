@@ -1,11 +1,11 @@
 "use strict";
 
-var os = require("os");
-var path = require("path");
+var os = require("node:os");
+var path = require("node:path");
 
 var fs = require("graceful-fs");
-var sinon = require("sinon");
-var expect = require("expect");
+var assert = require("node:assert");
+var { afterEach, beforeEach, describe, it } = require("node:test");
 var rimraf = require("rimraf");
 
 var mkdirpStream = require("../");
@@ -34,8 +34,6 @@ function suite(moduleName) {
     var outputDirpath = path.join(outputBase, "./foo");
 
     function cleanup(done) {
-      this.timeout(20000);
-
       // Async del to get sort-of-fix for https://github.com/isaacs/rimraf/issues/72
       rimraf(outputBase, done);
     }
@@ -61,58 +59,57 @@ function suite(moduleName) {
       return mode & ~current;
     }
 
-    beforeEach(cleanup);
-    afterEach(cleanup);
+    beforeEach((t, done) => cleanup(done), { timeout: 10000 });
 
-    beforeEach(function (done) {
+    beforeEach(function (t, done) {
       fs.mkdir(outputBase, function (err) {
         if (err) {
           return done(err);
         }
-
         // Linux inherits the setgid of the directory and it messes up our assertions
         // So we explixitly set the mode to 777 before each test
         fs.chmod(outputBase, "777", done);
       });
     });
 
-    it("exports a main function", function (done) {
-      expect(typeof mkdirpStream).toEqual("function");
-      done();
+    afterEach((t, done) => cleanup(done), { timeout: 10000 });
+
+    it("exports a main function", function () {
+      assert.strictEqual(typeof mkdirpStream, "function");
     });
 
-    it("takes a string to create", function (done) {
-      function assert(err) {
-        expect(statMode(outputDirpath)).toBeDefined();
+    it("takes a string to create", function (t, done) {
+      function assertion(err) {
+        assert.ok(statMode(outputDirpath));
         done(err);
       }
 
       stream.pipeline(
         [stream.Readable.from(["test"]), mkdirpStream(outputDirpath), sink()],
-        assert,
+        assertion,
       );
     });
 
-    it("takes a resolver function that receives chunk", function (done) {
+    it("takes a resolver function that receives chunk", function (t, done) {
       var expected = "test";
 
       function resolver(chunk, cb) {
-        expect(chunk).toEqual(expected);
+        assert.strictEqual(chunk, expected);
         cb(null, outputDirpath);
       }
 
-      function assert(err) {
-        expect(statMode(outputDirpath)).toBeDefined();
+      function assertion(err) {
+        assert.ok(statMode(outputDirpath));
         done(err);
       }
 
       stream.pipeline(
         [stream.Readable.from(["test"]), mkdirpStream(resolver), sink()],
-        assert,
+        assertion,
       );
     });
 
-    it("can pass a mode as the 3rd argument to the resolver callback", function (done) {
+    it("can pass a mode as the 3rd argument to the resolver callback", function (t, done) {
       if (isWindows) {
         this.skip();
         return;
@@ -123,22 +120,22 @@ function suite(moduleName) {
       var expected = "test";
 
       function resolver(chunk, cb) {
-        expect(chunk).toEqual(expected);
+        assert.strictEqual(chunk, expected);
         cb(null, outputDirpath, mode);
       }
 
-      function assert(err) {
-        expect(statMode(outputDirpath)).toEqual(mode);
+      function assertion(err) {
+        assert.strictEqual(statMode(outputDirpath), mode);
         done(err);
       }
 
       stream.pipeline(
         [stream.Readable.from(["test"]), mkdirpStream(resolver), sink()],
-        assert,
+        assertion,
       );
     });
 
-    it("can pass an error as the 1st argument to the resolver callback to error", function (done) {
+    it("can pass an error as the 1st argument to the resolver callback to error", function (t, done) {
       function resolver(chunk, cb) {
         cb(new Error("boom"));
       }
@@ -147,27 +144,27 @@ function suite(moduleName) {
         statMode(outputDirpath);
       }
 
-      function assert(err) {
-        expect(err).toBeDefined();
-        expect(notExists).toThrow();
+      function assertion(err) {
+        assert.ok(err);
+        assert.throws(notExists);
         done();
       }
 
       stream.pipeline(
         [stream.Readable.from(["test"]), mkdirpStream(resolver), sink()],
-        assert,
+        assertion,
       );
     });
 
-    it("works with objectMode", function (done) {
+    it("works with objectMode", function (t, done) {
       function resolver(chunk, cb) {
-        expect(typeof chunk).toEqual("object");
-        expect(chunk.dirname).toBeDefined();
+        assert.strictEqual(typeof chunk, "object");
+        assert.ok(chunk.dirname);
         cb(null, chunk.dirname);
       }
 
-      function assert(err) {
-        expect(statMode(outputDirpath)).toBeDefined();
+      function assertion(err) {
+        assert.ok(statMode(outputDirpath));
         done(err);
       }
 
@@ -177,29 +174,26 @@ function suite(moduleName) {
           mkdirpStream(resolver),
           sink(),
         ],
-        assert,
+        assertion,
       );
     });
 
-    it("bubbles mkdir errors", function (done) {
-      sinon.stub(fs, "mkdir").callsFake(function (dirpath, mode, cb) {
-        cb(new Error("boom"));
-      });
+    it("bubbles mkdir errors", function (t, done) {
+      t.mock.method(fs, "mkdir", (dirpath, mode, cb) => cb(new Error("boom")));
 
       function notExists() {
         statMode(outputDirpath);
       }
 
-      function assert(err) {
-        expect(err).toBeDefined();
-        expect(notExists).toThrow();
-        fs.mkdir.restore();
+      function assertion(err) {
+        assert.ok(err);
+        assert.throws(notExists);
         done();
       }
 
       stream.pipeline(
         [stream.Readable.from(["test"]), mkdirpStream(outputDirpath), sink()],
-        assert,
+        assertion,
       );
     });
   });
