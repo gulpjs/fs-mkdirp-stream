@@ -2,8 +2,6 @@
 
 var os = require("node:os");
 var path = require("node:path");
-
-var fs = require("graceful-fs");
 var assert = require("node:assert");
 var {
   afterEach,
@@ -13,6 +11,8 @@ var {
   it,
   after,
 } = require("node:test");
+
+var fs = require("graceful-fs");
 var rimraf = require("rimraf");
 
 var mkdirp = require("../mkdirp");
