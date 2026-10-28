@@ -30,7 +30,7 @@ function suite(moduleName) {
     var MASK_MODE = parseInt("7777", 8);
     var isWindows = os.platform() === "win32";
 
-    var outputBase = path.join(__dirname, "./out-fixtures");
+    var outputBase = path.join(__dirname, "./mkdirp-stream-out-fixtures");
     var outputDirpath = path.join(outputBase, "./foo");
 
     function cleanup(t, done) {

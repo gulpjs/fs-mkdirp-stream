@@ -35,7 +35,7 @@ function suite() {
   var DEFAULT_DIR_MODE = parseInt("0777", 8);
   var isWindows = os.platform() === "win32";
 
-  var outputBase = path.join(__dirname, "./out-fixtures");
+  var outputBase = path.join(__dirname, "./mkdir-out-fixtures");
   var outputDirpath = path.join(outputBase, "./foo");
   var outputNestedPath = path.join(outputDirpath, "./test.txt");
   var outputNestedDirpath = path.join(outputDirpath, "./bar/baz/");
