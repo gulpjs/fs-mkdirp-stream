@@ -2,10 +2,10 @@
 
 var os = require("node:os");
 var path = require("node:path");
-
-var fs = require("graceful-fs");
 var assert = require("node:assert");
 var { afterEach, beforeEach, describe, it } = require("node:test");
+
+var fs = require("graceful-fs");
 var rimraf = require("rimraf");
 
 var mkdirpStream = require("../");
@@ -26,9 +26,9 @@ function suite(moduleName) {
     });
   }
 
-  describe("mkdirpStream (" + moduleName + ")", function () {
+  describe("mkdirpStream (" + moduleName + ")", () => {
     var MASK_MODE = parseInt("7777", 8);
-    var isWindows = os.platform() === "win32";
+    var skipWin32 = { skip: os.platform() === "win32" };
 
     var outputBase = path.join(__dirname, "./mkdirp-stream-out-fixtures");
     var outputDirpath = path.join(outputBase, "./foo");
@@ -60,8 +60,9 @@ function suite(moduleName) {
     }
 
     beforeEach(cleanup, { timeout: 10000 });
+    afterEach(cleanup, { timeout: 10000 });
 
-    beforeEach(function (t, done) {
+    beforeEach((t, done) => {
       fs.mkdir(outputBase, function (err) {
         if (err) {
           return done(err);
@@ -72,13 +73,11 @@ function suite(moduleName) {
       });
     });
 
-    afterEach(cleanup, { timeout: 10000 });
-
-    it("exports a main function", function () {
+    it("exports a main function", () => {
       assert.strictEqual(typeof mkdirpStream, "function");
     });
 
-    it("takes a string to create", function (t, done) {
+    it("takes a string to create", (t, done) => {
       function assertion(err) {
         assert.ok(statMode(outputDirpath));
         done(err);
@@ -90,7 +89,7 @@ function suite(moduleName) {
       );
     });
 
-    it("takes a resolver function that receives chunk", function (t, done) {
+    it("takes a resolver function that receives chunk", (t, done) => {
       var expected = "test";
 
       function resolver(chunk, cb) {
@@ -111,8 +110,8 @@ function suite(moduleName) {
 
     it(
       "can pass a mode as the 3rd argument to the resolver callback",
-      { skip: isWindows },
-      function (t, done) {
+      skipWin32,
+      (t, done) => {
         var mode = applyUmask("700");
 
         var expected = "test";
@@ -134,7 +133,7 @@ function suite(moduleName) {
       },
     );
 
-    it("can pass an error as the 1st argument to the resolver callback to error", function (t, done) {
+    it("can pass an error as the 1st argument to the resolver callback to error", (t, done) => {
       function resolver(chunk, cb) {
         cb(new Error("boom"));
       }
@@ -155,7 +154,7 @@ function suite(moduleName) {
       );
     });
 
-    it("works with objectMode", function (t, done) {
+    it("works with objectMode", (t, done) => {
       function resolver(chunk, cb) {
         assert.strictEqual(typeof chunk, "object");
         assert.ok(chunk.dirname);
@@ -177,7 +176,7 @@ function suite(moduleName) {
       );
     });
 
-    it("bubbles mkdir errors", function (t, done) {
+    it("bubbles mkdir errors", (t, done) => {
       t.mock.method(fs, "mkdir", (dirpath, mode, cb) => cb(new Error("boom")));
 
       function notExists() {
