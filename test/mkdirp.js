@@ -183,7 +183,7 @@ function suite() {
         assert.ifError(err);
 
         mkdirp(outputDirpath, function (err2) {
-          assert.ok(!err2);
+          assert.ifError(err2);
           assert.strictEqual(createdMode(outputDirpath), expectedMode(mode));
 
           done();
@@ -228,7 +228,7 @@ function suite() {
       assert.strictEqual(createdMode(outputDirpath), expectedDefaultMode());
 
       mkdirp(outputDirpath, mode, function (err2) {
-        assert.ok(!err2);
+        assert.ifError(err2);
         assert.strictEqual(createdMode(outputDirpath), expectedMode(mode));
 
         done();
@@ -271,7 +271,7 @@ function suite() {
       assert.ifError(err);
 
       fs.writeFile(outputNestedPath, contents, function (err2) {
-        assert.ok(!err2);
+        assert.ifError(err2);
 
         mkdirp(outputNestedPath, function (err3) {
           assert.ok(err3);
@@ -291,7 +291,7 @@ function suite() {
       assert.ifError(err);
 
       fs.writeFile(outputNestedPath, contents, function (err2) {
-        assert.ok(!err2);
+        assert.ifError(err2);
 
         mkdirp(nestedPastFile, function (err3) {
           assert.ok(err3);
@@ -311,7 +311,7 @@ function suite() {
       assert.ifError(err);
 
       fs.writeFile(outputNestedPath, contents, function (err2) {
-        assert.ok(!err2);
+        assert.ifError(err2);
 
         var existingMode = createdMode(outputNestedPath);
         assert.notEqual(existingMode, mode);
@@ -402,7 +402,7 @@ function suite() {
         assert.ifError(err);
 
         fs.symlink(target, outputDirpath, function (err2) {
-          assert.ok(!err2);
+          assert.ifError(err2);
           assert.strictEqual(createdMode(target), expectedDefaultMode());
 
           mkdirp(outputDirpath, mode, function (err3) {
@@ -422,10 +422,10 @@ function suite() {
         assert.ifError(err);
 
         fs.symlink(target, outputDirpath, function (err2) {
-          assert.ok(!err2);
+          assert.ifError(err2);
 
           mkdirp(outputNestedDirpath, function (err3) {
-            assert.ok(!err3);
+            assert.ifError(err3);
             assert.ok(createdMode(expected));
             done();
           });
@@ -440,10 +440,10 @@ function suite() {
         assert.ifError(err);
 
         fs.writeFile(target, contents, function (err2) {
-          assert.ok(!err2);
+          assert.ifError(err2);
 
           fs.symlink(target, outputNestedPath, function (err3) {
-            assert.ok(!err3);
+            assert.ifError(err3);
 
             mkdirp(outputNestedPath, function (err4) {
               assert.ok(err4);
@@ -463,7 +463,7 @@ function suite() {
         assert.ifError(err);
 
         fs.symlink(target, outputDirpath, function (err2) {
-          assert.ok(!err2);
+          assert.ifError(err2);
 
           mkdirp(outputNestedDirpath, function (err3) {
             assert.ok(err3);
@@ -501,10 +501,10 @@ function suite() {
         assert.ifError(err);
 
         fs.writeFile(target, contents, function (err2) {
-          assert.ok(!err2);
+          assert.ifError(err2);
 
           fs.symlink(target, outputNestedPath, function (err3) {
-            assert.ok(!err3);
+            assert.ifError(err3);
 
             mkdirp(outputNestedPath, function (err4) {
               assert.ok(err4);
