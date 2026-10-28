@@ -33,7 +33,7 @@ var log = {
 function suite() {
   var MASK_MODE = parseInt("7777", 8);
   var DEFAULT_DIR_MODE = parseInt("0777", 8);
-  var skip = { skip: os.platform() === "win32" };
+  var skipWin32 = { skip: os.platform() === "win32" };
 
   var outputBase = path.join(__dirname, "./mkdir-out-fixtures");
   var outputDirpath = path.join(outputBase, "./foo");
@@ -79,7 +79,7 @@ function suite() {
   beforeEach(cleanup, { timeout: 10000 });
   afterEach(cleanup, { timeout: 10000 });
 
-  beforeEach(function (t, done) {
+  beforeEach((t, done) => {
     fs.mkdir(outputBase, function (err) {
       if (err) {
         return done(err);
@@ -90,7 +90,7 @@ function suite() {
     });
   });
 
-  it("makes a single directory", function (t, done) {
+  it("makes a single directory", (t, done) => {
     mkdirp(outputDirpath, function (err) {
       assert.ifError(err);
       assert.ok(createdMode(outputDirpath));
@@ -99,7 +99,7 @@ function suite() {
     });
   });
 
-  it("makes single directory w/ default mode", skip, function (t, done) {
+  it("makes single directory w/ default mode", skipWin32, (t, done) => {
     mkdirp(outputDirpath, function (err) {
       assert.ifError(err);
       assert.strictEqual(createdMode(outputDirpath), expectedDefaultMode());
@@ -108,7 +108,7 @@ function suite() {
     });
   });
 
-  it("makes multiple directories", function (t, done) {
+  it("makes multiple directories", (t, done) => {
     mkdirp(outputNestedDirpath, function (err) {
       assert.ifError(err);
       assert.ok(createdMode(outputNestedDirpath));
@@ -117,7 +117,7 @@ function suite() {
     });
   });
 
-  it("makes multiple directories w/ default mode", skip, function (t, done) {
+  it("makes multiple directories w/ default mode", skipWin32, (t, done) => {
     mkdirp(outputNestedDirpath, function (err) {
       assert.ifError(err);
       assert.strictEqual(
@@ -129,7 +129,7 @@ function suite() {
     });
   });
 
-  it("makes directory with custom mode as string", skip, function (t, done) {
+  it("makes directory with custom mode as string", skipWin32, (t, done) => {
     var mode = "777";
 
     mkdirp(outputDirpath, mode, function (err) {
@@ -140,7 +140,7 @@ function suite() {
     });
   });
 
-  it("makes directory with custom mode as octal", skip, function (t, done) {
+  it("makes directory with custom mode as octal", skipWin32, (t, done) => {
     var mode = parseInt("777", 8);
 
     mkdirp(outputDirpath, mode, function (err) {
@@ -151,7 +151,7 @@ function suite() {
     });
   });
 
-  it("does not mask a custom mode", skip, function (t, done) {
+  it("does not mask a custom mode", skipWin32, (t, done) => {
     var mode = parseInt("777", 8);
 
     mkdirp(outputDirpath, mode, function (err) {
@@ -162,7 +162,7 @@ function suite() {
     });
   });
 
-  it("can create a directory with setgid permission", skip, function (t, done) {
+  it("can create a directory with setgid permission", skipWin32, (t, done) => {
     var mode = "2700";
 
     mkdirp(outputDirpath, mode, function (err) {
@@ -175,8 +175,8 @@ function suite() {
 
   it(
     "does not change directory mode if exists and no mode given",
-    skip,
-    function (t, done) {
+    skipWin32,
+    (t, done) => {
       var mode = "777";
 
       mkdirp(outputDirpath, mode, function (err) {
@@ -192,7 +192,7 @@ function suite() {
     },
   );
 
-  it("makes multiple directories with custom mode", skip, function (t, done) {
+  it("makes multiple directories with custom mode", skipWin32, (t, done) => {
     var mode = "777";
 
     mkdirp(outputNestedDirpath, mode, function (err) {
@@ -203,7 +203,7 @@ function suite() {
     });
   });
 
-  it("uses default mode on intermediate directories", skip, function (t, done) {
+  it("uses default mode on intermediate directories", skipWin32, (t, done) => {
     var intermediateDirpath = path.dirname(outputNestedDirpath);
     var mode = "777";
 
@@ -220,7 +220,7 @@ function suite() {
     });
   });
 
-  it("changes mode of existing directory", skip, function (t, done) {
+  it("changes mode of existing directory", skipWin32, (t, done) => {
     var mode = "777";
 
     fs.mkdir(outputDirpath, function (err) {
@@ -236,7 +236,7 @@ function suite() {
     });
   });
 
-  it("surfaces chmod errors", function (t, done) {
+  it("surfaces chmod errors", (t, done) => {
     t.mock.method(fs, "chmod", (p, mode, cb) => {
       cb(new Error("boom"));
     });
@@ -250,7 +250,7 @@ function suite() {
     });
   });
 
-  it("does not surface error ENOSUP if chmod is unsupported on the path", function (t, done) {
+  it("does not surface error ENOSUP if chmod is unsupported on the path", (t, done) => {
     t.mock.method(fs, "chmod", (p, mode, cb) => {
       var err = new Error("boom");
       err.code = "ENOSUP";
@@ -266,7 +266,7 @@ function suite() {
     });
   });
 
-  it("errors with ENOTDIR if file in path", function (t, done) {
+  it("errors with ENOTDIR if file in path", (t, done) => {
     fs.mkdir(outputDirpath, function (err) {
       assert.ifError(err);
 
@@ -284,7 +284,7 @@ function suite() {
     });
   });
 
-  it("errors with ENOTDIR if file in path of nested mkdirp", function (t, done) {
+  it("errors with ENOTDIR if file in path of nested mkdirp", (t, done) => {
     var nestedPastFile = path.join(outputNestedPath, "./bar/baz/");
 
     fs.mkdir(outputDirpath, function (err) {
@@ -304,7 +304,7 @@ function suite() {
     });
   });
 
-  it("does not change mode of existing file", skip, function (t, done) {
+  it("does not change mode of existing file", skipWin32, (t, done) => {
     var mode = "777";
 
     fs.mkdir(outputDirpath, function (err) {
@@ -326,7 +326,7 @@ function suite() {
     });
   });
 
-  it("surfaces mkdir errors that happening during recursion", function (t, done) {
+  it("surfaces mkdir errors that happening during recursion", (t, done) => {
     var ogMkdir = fs.mkdir;
     var stub = t.mock.method(fs, "mkdir", (p, mode, cb) => {
       cb(new Error("boom"));
@@ -340,7 +340,7 @@ function suite() {
     });
   });
 
-  it("surfaces fs.stat errors", function (t, done) {
+  it("surfaces fs.stat errors", (t, done) => {
     t.mock.method(fs, "stat", (dirpath, cb) => {
       cb(new Error("boom"));
     });
@@ -354,8 +354,8 @@ function suite() {
 
   it(
     "does not attempt fs.chmod if custom mode matches mode on disk",
-    skip,
-    function (t, done) {
+    skipWin32,
+    (t, done) => {
       var mode = "777";
 
       mkdirp(outputDirpath, mode, function (err) {
@@ -373,8 +373,8 @@ function suite() {
     },
   );
 
-  describe("symlinks", skip, function () {
-    it("succeeds with a directory at the target of a symlink", function (t, done) {
+  describe("symlinks", skipWin32, () => {
+    it("succeeds with a directory at the target of a symlink", (t, done) => {
       var target = path.join(outputBase, "target");
 
       fs.mkdir(target, function (err) {
@@ -393,7 +393,7 @@ function suite() {
       });
     });
 
-    it("changes mode of existing directory at the target of a symlink", function (t, done) {
+    it("changes mode of existing directory at the target of a symlink", (t, done) => {
       var target = path.join(outputBase, "target");
 
       var mode = "777";
@@ -414,7 +414,7 @@ function suite() {
       });
     });
 
-    it("creates nested directories at the target of a symlink", function (t, done) {
+    it("creates nested directories at the target of a symlink", (t, done) => {
       var target = path.join(outputBase, "target");
       var expected = path.join(target, "./bar/baz/");
 
@@ -433,7 +433,7 @@ function suite() {
       });
     });
 
-    it("errors with ENOTDIR if the target of a symlink is a file", function (t, done) {
+    it("errors with ENOTDIR if the target of a symlink is a file", (t, done) => {
       var target = path.join(outputBase, "test.txt");
 
       fs.mkdir(outputDirpath, function (err) {
@@ -456,7 +456,7 @@ function suite() {
       });
     });
 
-    it("errors with ENOTDIR if the target of a symlink is a file in a nested mkdirp", function (t, done) {
+    it("errors with ENOTDIR if the target of a symlink is a file in a nested mkdirp", (t, done) => {
       var target = path.join(outputBase, "test.txt");
 
       fs.writeFile(target, contents, function (err) {
@@ -475,7 +475,7 @@ function suite() {
       });
     });
 
-    it("errors with ENOENT if the target of a symlink is missing (a.k.a. dangling symlink)", function (t, done) {
+    it("errors with ENOENT if the target of a symlink is missing (a.k.a. dangling symlink)", (t, done) => {
       var target = path.join(outputBase, "dangling-link");
 
       fs.symlink(target, outputDirpath, function (err) {
@@ -490,7 +490,7 @@ function suite() {
       });
     });
 
-    it("properly surfaces top-level error if lstat fails", function (t, done) {
+    it("properly surfaces top-level error if lstat fails", (t, done) => {
       var target = path.join(outputBase, "test.txt");
 
       t.mock.method(fs, "lstat", (dirpath, cb) => {
@@ -518,7 +518,7 @@ function suite() {
       });
     });
 
-    it("properly surfaces top-level error if readlink fails", function (t, done) {
+    it("properly surfaces top-level error if readlink fails", (t, done) => {
       var target = path.join(outputBase, "target");
 
       t.mock.method(fs, "readlink", (dirpath, cb) => {
@@ -542,15 +542,15 @@ function suite() {
 
 describe("mkdirp", suite);
 
-describe("mkdirp with umask", function () {
+describe("mkdirp with umask", () => {
   var startingUmask;
-  before(function (t, done) {
+  before((t, done) => {
     startingUmask = process.umask(parseInt("066", 8));
 
     done();
   });
 
-  after(function (t, done) {
+  after((t, done) => {
     process.umask(startingUmask);
 
     done();
