@@ -192,67 +192,49 @@ function suite() {
     },
   );
 
-  it(
-    "makes multiple directories with custom mode",
-    { skip: isWindows },
-    function (t, done) {
-      var mode = "777";
+  it("makes multiple directories with custom mode", skip, function (t, done) {
+    var mode = "777";
 
-      mkdirp(outputNestedDirpath, mode, function (err) {
-        assert.ifError(err);
-        assert.strictEqual(
-          createdMode(outputNestedDirpath),
-          expectedMode(mode),
-        );
+    mkdirp(outputNestedDirpath, mode, function (err) {
+      assert.ifError(err);
+      assert.strictEqual(createdMode(outputNestedDirpath), expectedMode(mode));
+
+      done();
+    });
+  });
+
+  it("uses default mode on intermediate directories", skip, function (t, done) {
+    var intermediateDirpath = path.dirname(outputNestedDirpath);
+    var mode = "777";
+
+    mkdirp(outputNestedDirpath, mode, function (err) {
+      assert.ifError(err);
+      assert.strictEqual(createdMode(outputDirpath), expectedDefaultMode());
+      assert.strictEqual(
+        createdMode(intermediateDirpath),
+        expectedDefaultMode(),
+      );
+      assert.strictEqual(createdMode(outputNestedDirpath), expectedMode(mode));
+
+      done();
+    });
+  });
+
+  it("changes mode of existing directory", skip, function (t, done) {
+    var mode = "777";
+
+    fs.mkdir(outputDirpath, function (err) {
+      assert.ifError(err);
+      assert.strictEqual(createdMode(outputDirpath), expectedDefaultMode());
+
+      mkdirp(outputDirpath, mode, function (err2) {
+        assert.ok(!err2);
+        assert.strictEqual(createdMode(outputDirpath), expectedMode(mode));
 
         done();
       });
-    },
-  );
-
-  it(
-    "uses default mode on intermediate directories",
-    { skip: isWindows },
-    function (t, done) {
-      var intermediateDirpath = path.dirname(outputNestedDirpath);
-      var mode = "777";
-
-      mkdirp(outputNestedDirpath, mode, function (err) {
-        assert.ifError(err);
-        assert.strictEqual(createdMode(outputDirpath), expectedDefaultMode());
-        assert.strictEqual(
-          createdMode(intermediateDirpath),
-          expectedDefaultMode(),
-        );
-        assert.strictEqual(
-          createdMode(outputNestedDirpath),
-          expectedMode(mode),
-        );
-
-        done();
-      });
-    },
-  );
-
-  it(
-    "changes mode of existing directory",
-    { skip: isWindows },
-    function (t, done) {
-      var mode = "777";
-
-      fs.mkdir(outputDirpath, function (err) {
-        assert.ifError(err);
-        assert.strictEqual(createdMode(outputDirpath), expectedDefaultMode());
-
-        mkdirp(outputDirpath, mode, function (err2) {
-          assert.ok(!err2);
-          assert.strictEqual(createdMode(outputDirpath), expectedMode(mode));
-
-          done();
-        });
-      });
-    },
-  );
+    });
+  });
 
   it("surfaces chmod errors", function (t, done) {
     t.mock.method(fs, "chmod", (p, mode, cb) => {
