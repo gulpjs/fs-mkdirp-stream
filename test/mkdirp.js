@@ -33,7 +33,7 @@ var log = {
 function suite() {
   var MASK_MODE = parseInt("7777", 8);
   var DEFAULT_DIR_MODE = parseInt("0777", 8);
-  var isWindows = os.platform() === "win32";
+  var skip = { skip: os.platform() === "win32" };
 
   var outputBase = path.join(__dirname, "./mkdir-out-fixtures");
   var outputDirpath = path.join(outputBase, "./foo");
@@ -99,18 +99,14 @@ function suite() {
     });
   });
 
-  it(
-    "makes single directory w/ default mode",
-    { skip: isWindows },
-    function (t, done) {
-      mkdirp(outputDirpath, function (err) {
-        assert.ifError(err);
-        assert.strictEqual(createdMode(outputDirpath), expectedDefaultMode());
+  it("makes single directory w/ default mode", skip, function (t, done) {
+    mkdirp(outputDirpath, function (err) {
+      assert.ifError(err);
+      assert.strictEqual(createdMode(outputDirpath), expectedDefaultMode());
 
-        done();
-      });
-    },
-  );
+      done();
+    });
+  });
 
   it("makes multiple directories", function (t, done) {
     mkdirp(outputNestedDirpath, function (err) {
@@ -121,53 +117,41 @@ function suite() {
     });
   });
 
-  it(
-    "makes multiple directories w/ default mode",
-    { skip: isWindows },
-    function (t, done) {
-      mkdirp(outputNestedDirpath, function (err) {
-        assert.ifError(err);
-        assert.strictEqual(
-          createdMode(outputNestedDirpath),
-          expectedDefaultMode(),
-        );
+  it("makes multiple directories w/ default mode", skip, function (t, done) {
+    mkdirp(outputNestedDirpath, function (err) {
+      assert.ifError(err);
+      assert.strictEqual(
+        createdMode(outputNestedDirpath),
+        expectedDefaultMode(),
+      );
 
-        done();
-      });
-    },
-  );
+      done();
+    });
+  });
 
-  it(
-    "makes directory with custom mode as string",
-    { skip: isWindows },
-    function (t, done) {
-      var mode = "777";
+  it("makes directory with custom mode as string", skip, function (t, done) {
+    var mode = "777";
 
-      mkdirp(outputDirpath, mode, function (err) {
-        assert.ifError(err);
-        assert.strictEqual(createdMode(outputDirpath), expectedMode(mode));
+    mkdirp(outputDirpath, mode, function (err) {
+      assert.ifError(err);
+      assert.strictEqual(createdMode(outputDirpath), expectedMode(mode));
 
-        done();
-      });
-    },
-  );
+      done();
+    });
+  });
 
-  it(
-    "makes directory with custom mode as octal",
-    { skip: isWindows },
-    function (t, done) {
-      var mode = parseInt("777", 8);
+  it("makes directory with custom mode as octal", skip, function (t, done) {
+    var mode = parseInt("777", 8);
 
-      mkdirp(outputDirpath, mode, function (err) {
-        assert.ifError(err);
-        assert.strictEqual(createdMode(outputDirpath), expectedMode(mode));
+    mkdirp(outputDirpath, mode, function (err) {
+      assert.ifError(err);
+      assert.strictEqual(createdMode(outputDirpath), expectedMode(mode));
 
-        done();
-      });
-    },
-  );
+      done();
+    });
+  });
 
-  it("does not mask a custom mode", { skip: isWindows }, function (t, done) {
+  it("does not mask a custom mode", skip, function (t, done) {
     var mode = parseInt("777", 8);
 
     mkdirp(outputDirpath, mode, function (err) {
@@ -178,24 +162,20 @@ function suite() {
     });
   });
 
-  it(
-    "can create a directory with setgid permission",
-    { skip: isWindows },
-    function (t, done) {
-      var mode = "2700";
+  it("can create a directory with setgid permission", skip, function (t, done) {
+    var mode = "2700";
 
-      mkdirp(outputDirpath, mode, function (err) {
-        assert.ifError(err);
-        assert.strictEqual(createdMode(outputDirpath), expectedMode(mode));
+    mkdirp(outputDirpath, mode, function (err) {
+      assert.ifError(err);
+      assert.strictEqual(createdMode(outputDirpath), expectedMode(mode));
 
-        done();
-      });
-    },
-  );
+      done();
+    });
+  });
 
   it(
     "does not change directory mode if exists and no mode given",
-    { skip: isWindows },
+    skip,
     function (t, done) {
       var mode = "777";
 
@@ -342,31 +322,27 @@ function suite() {
     });
   });
 
-  it(
-    "does not change mode of existing file",
-    { skip: isWindows },
-    function (t, done) {
-      var mode = "777";
+  it("does not change mode of existing file", skip, function (t, done) {
+    var mode = "777";
 
-      fs.mkdir(outputDirpath, function (err) {
-        assert.ifError(err);
+    fs.mkdir(outputDirpath, function (err) {
+      assert.ifError(err);
 
-        fs.writeFile(outputNestedPath, contents, function (err2) {
-          assert.ok(!err2);
+      fs.writeFile(outputNestedPath, contents, function (err2) {
+        assert.ok(!err2);
 
-          var existingMode = createdMode(outputNestedPath);
-          assert.notEqual(existingMode, mode);
+        var existingMode = createdMode(outputNestedPath);
+        assert.notEqual(existingMode, mode);
 
-          mkdirp(outputNestedPath, mode, function (err3) {
-            assert.ok(err3);
-            assert.strictEqual(createdMode(outputNestedPath), existingMode);
+        mkdirp(outputNestedPath, mode, function (err3) {
+          assert.ok(err3);
+          assert.strictEqual(createdMode(outputNestedPath), existingMode);
 
-            done();
-          });
+          done();
         });
       });
-    },
-  );
+    });
+  });
 
   it("surfaces mkdir errors that happening during recursion", function (t, done) {
     var ogMkdir = fs.mkdir;
@@ -396,7 +372,7 @@ function suite() {
 
   it(
     "does not attempt fs.chmod if custom mode matches mode on disk",
-    { skip: isWindows },
+    skip,
     function (t, done) {
       var mode = "777";
 
@@ -415,7 +391,7 @@ function suite() {
     },
   );
 
-  describe("symlinks", { skip: isWindows }, function () {
+  describe("symlinks", skip, function () {
     it("succeeds with a directory at the target of a symlink", function (t, done) {
       var target = path.join(outputBase, "target");
 
