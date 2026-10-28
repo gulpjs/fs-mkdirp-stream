@@ -327,14 +327,14 @@ function suite() {
   });
 
   it("surfaces mkdir errors that happening during recursion", (t, done) => {
-    var ogMkdir = fs.mkdir;
-    var stub = t.mock.method(fs, "mkdir", (p, mode, cb) => {
+    var stub = t.mock.method(fs, "mkdir");
+    stub.mock.mockImplementationOnce((p, mode, cb) => {
       cb(new Error("boom"));
-    });
+    }, 2);
 
-    stub.mock.mockImplementationOnce(ogMkdir);
     mkdirp(outputNestedDirpath, function (err) {
       assert.ok(err);
+      assert.strictEqual(stub.mock.callCount(), 2);
 
       done();
     });
