@@ -314,7 +314,7 @@ function suite() {
         assert.ifError(err2);
 
         var existingMode = createdMode(outputNestedPath);
-        assert.notEqual(existingMode, mode);
+        assert.notStrictEqual(existingMode, mode);
 
         mkdirp(outputNestedPath, mode, function (err3) {
           assert.ok(err3);
@@ -363,8 +363,8 @@ function suite() {
 
         var spy = t.mock.method(fs, "chmod");
 
-        mkdirp(outputDirpath, mode, function (err) {
-          assert.ifError(err);
+        mkdirp(outputDirpath, mode, function (err2) {
+          assert.ifError(err2);
           assert.strictEqual(spy.mock.callCount(), 0);
 
           done();
@@ -380,11 +380,11 @@ function suite() {
       fs.mkdir(target, function (err) {
         assert.ifError(err);
 
-        fs.symlink(target, outputDirpath, function (err) {
-          assert.ifError(err);
+        fs.symlink(target, outputDirpath, function (err2) {
+          assert.ifError(err2);
 
-          mkdirp(outputDirpath, function (err) {
-            assert.ifError(err);
+          mkdirp(outputDirpath, function (err3) {
+            assert.ifError(err3);
             assert.ok(createdMode(target));
 
             done();
