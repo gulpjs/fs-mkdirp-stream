@@ -1,11 +1,18 @@
 "use strict";
 
-var os = require("os");
-var path = require("path");
+var os = require("node:os");
+var path = require("node:path");
+var assert = require("node:assert");
+var {
+  afterEach,
+  before,
+  beforeEach,
+  describe,
+  it,
+  after,
+} = require("node:test");
 
 var fs = require("graceful-fs");
-var sinon = require("sinon");
-var expect = require("expect");
 var rimraf = require("rimraf");
 
 var mkdirp = require("../mkdirp");
@@ -26,17 +33,15 @@ var log = {
 function suite() {
   var MASK_MODE = parseInt("7777", 8);
   var DEFAULT_DIR_MODE = parseInt("0777", 8);
-  var isWindows = os.platform() === "win32";
+  var skipWin32 = { skip: os.platform() === "win32" };
 
-  var outputBase = path.join(__dirname, "./out-fixtures");
+  var outputBase = path.join(__dirname, "./mkdir-out-fixtures");
   var outputDirpath = path.join(outputBase, "./foo");
   var outputNestedPath = path.join(outputDirpath, "./test.txt");
   var outputNestedDirpath = path.join(outputDirpath, "./bar/baz/");
   var contents = "Hello World!\n";
 
-  function cleanup(done) {
-    this.timeout(20000);
-
+  function cleanup(t, done) {
     // Async del to get sort-of-fix for https://github.com/isaacs/rimraf/issues/72
     rimraf(outputBase, done);
   }
@@ -71,225 +76,182 @@ function suite() {
     return mode;
   }
 
-  beforeEach(cleanup);
-  afterEach(cleanup);
+  beforeEach(cleanup, { timeout: 10000 });
+  afterEach(cleanup, { timeout: 10000 });
 
-  beforeEach(function (done) {
+  beforeEach((t, done) => {
     fs.mkdir(outputBase, function (err) {
       if (err) {
         return done(err);
       }
-
       // Linux inherits the setgid of the directory and it messes up our assertions
       // So we explixitly set the mode to 777 before each test
       fs.chmod(outputBase, "777", done);
     });
   });
 
-  it("makes a single directory", function (done) {
+  it("makes a single directory", (t, done) => {
     mkdirp(outputDirpath, function (err) {
-      expect(err).toBeFalsy();
-      expect(createdMode(outputDirpath)).toBeDefined();
+      assert.ifError(err);
+      assert.ok(createdMode(outputDirpath));
 
       done();
     });
   });
 
-  it("makes single directory w/ default mode", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("makes single directory w/ default mode", skipWin32, (t, done) => {
     mkdirp(outputDirpath, function (err) {
-      expect(err).toBeFalsy();
-      expect(createdMode(outputDirpath)).toEqual(expectedDefaultMode());
+      assert.ifError(err);
+      assert.strictEqual(createdMode(outputDirpath), expectedDefaultMode());
 
       done();
     });
   });
 
-  it("makes multiple directories", function (done) {
+  it("makes multiple directories", (t, done) => {
     mkdirp(outputNestedDirpath, function (err) {
-      expect(err).toBeFalsy();
-      expect(createdMode(outputNestedDirpath)).toBeDefined();
+      assert.ifError(err);
+      assert.ok(createdMode(outputNestedDirpath));
 
       done();
     });
   });
 
-  it("makes multiple directories w/ default mode", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("makes multiple directories w/ default mode", skipWin32, (t, done) => {
     mkdirp(outputNestedDirpath, function (err) {
-      expect(err).toBeFalsy();
-      expect(createdMode(outputNestedDirpath)).toEqual(expectedDefaultMode());
+      assert.ifError(err);
+      assert.strictEqual(
+        createdMode(outputNestedDirpath),
+        expectedDefaultMode(),
+      );
 
       done();
     });
   });
 
-  it("makes directory with custom mode as string", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("makes directory with custom mode as string", skipWin32, (t, done) => {
     var mode = "777";
 
     mkdirp(outputDirpath, mode, function (err) {
-      expect(err).toBeFalsy();
-      expect(createdMode(outputDirpath)).toEqual(expectedMode(mode));
+      assert.ifError(err);
+      assert.strictEqual(createdMode(outputDirpath), expectedMode(mode));
 
       done();
     });
   });
 
-  it("makes directory with custom mode as octal", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("makes directory with custom mode as octal", skipWin32, (t, done) => {
     var mode = parseInt("777", 8);
 
     mkdirp(outputDirpath, mode, function (err) {
-      expect(err).toBeFalsy();
-      expect(createdMode(outputDirpath)).toEqual(expectedMode(mode));
+      assert.ifError(err);
+      assert.strictEqual(createdMode(outputDirpath), expectedMode(mode));
 
       done();
     });
   });
 
-  it("does not mask a custom mode", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("does not mask a custom mode", skipWin32, (t, done) => {
     var mode = parseInt("777", 8);
 
     mkdirp(outputDirpath, mode, function (err) {
-      expect(err).toBeFalsy();
-      expect(createdMode(outputDirpath)).toEqual(mode);
+      assert.ifError(err);
+      assert.strictEqual(createdMode(outputDirpath), mode);
 
       done();
     });
   });
 
-  it("can create a directory with setgid permission", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("can create a directory with setgid permission", skipWin32, (t, done) => {
     var mode = "2700";
 
     mkdirp(outputDirpath, mode, function (err) {
-      expect(err).toBeFalsy();
-      expect(createdMode(outputDirpath)).toEqual(expectedMode(mode));
+      assert.ifError(err);
+      assert.strictEqual(createdMode(outputDirpath), expectedMode(mode));
 
       done();
     });
   });
 
-  it("does not change directory mode if exists and no mode given", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
+  it(
+    "does not change directory mode if exists and no mode given",
+    skipWin32,
+    (t, done) => {
+      var mode = "777";
 
-    var mode = "777";
+      mkdirp(outputDirpath, mode, function (err) {
+        assert.ifError(err);
 
-    mkdirp(outputDirpath, mode, function (err) {
-      expect(err).toBeFalsy();
+        mkdirp(outputDirpath, function (err2) {
+          assert.ifError(err2);
+          assert.strictEqual(createdMode(outputDirpath), expectedMode(mode));
 
-      mkdirp(outputDirpath, function (err2) {
-        expect(err2).toBeFalsy();
-        expect(createdMode(outputDirpath)).toEqual(expectedMode(mode));
-
-        done();
+          done();
+        });
       });
-    });
-  });
+    },
+  );
 
-  it("makes multiple directories with custom mode", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("makes multiple directories with custom mode", skipWin32, (t, done) => {
     var mode = "777";
 
     mkdirp(outputNestedDirpath, mode, function (err) {
-      expect(err).toBeFalsy();
-      expect(createdMode(outputNestedDirpath)).toEqual(expectedMode(mode));
+      assert.ifError(err);
+      assert.strictEqual(createdMode(outputNestedDirpath), expectedMode(mode));
 
       done();
     });
   });
 
-  it("uses default mode on intermediate directories", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("uses default mode on intermediate directories", skipWin32, (t, done) => {
     var intermediateDirpath = path.dirname(outputNestedDirpath);
     var mode = "777";
 
     mkdirp(outputNestedDirpath, mode, function (err) {
-      expect(err).toBeFalsy();
-      expect(createdMode(outputDirpath)).toEqual(expectedDefaultMode());
-      expect(createdMode(intermediateDirpath)).toEqual(expectedDefaultMode());
-      expect(createdMode(outputNestedDirpath)).toEqual(expectedMode(mode));
+      assert.ifError(err);
+      assert.strictEqual(createdMode(outputDirpath), expectedDefaultMode());
+      assert.strictEqual(
+        createdMode(intermediateDirpath),
+        expectedDefaultMode(),
+      );
+      assert.strictEqual(createdMode(outputNestedDirpath), expectedMode(mode));
 
       done();
     });
   });
 
-  it("changes mode of existing directory", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("changes mode of existing directory", skipWin32, (t, done) => {
     var mode = "777";
 
     fs.mkdir(outputDirpath, function (err) {
-      expect(err).toBeFalsy();
-      expect(createdMode(outputDirpath)).toEqual(expectedDefaultMode());
+      assert.ifError(err);
+      assert.strictEqual(createdMode(outputDirpath), expectedDefaultMode());
 
       mkdirp(outputDirpath, mode, function (err2) {
-        expect(err2).toBeFalsy();
-        expect(createdMode(outputDirpath)).toEqual(expectedMode(mode));
+        assert.ifError(err2);
+        assert.strictEqual(createdMode(outputDirpath), expectedMode(mode));
 
         done();
       });
     });
   });
 
-  it("surfaces chmod errors", function (done) {
-    sinon.stub(fs, "chmod").callsFake(function (p, mode, cb) {
+  it("surfaces chmod errors", (t, done) => {
+    t.mock.method(fs, "chmod", (p, mode, cb) => {
       cb(new Error("boom"));
     });
 
     var mode = "777";
 
     mkdirp(outputDirpath, mode, function (err) {
-      fs.chmod.restore();
-
-      expect(err).toBeDefined();
+      assert.ok(err);
 
       done();
     });
   });
 
-  it("does not surface error ENOSUP if chmod is unsupported on the path", function (done) {
-    sinon.stub(fs, "chmod").callsFake(function (p, mode, cb) {
+  it("does not surface error ENOSUP if chmod is unsupported on the path", (t, done) => {
+    t.mock.method(fs, "chmod", (p, mode, cb) => {
       var err = new Error("boom");
       err.code = "ENOSUP";
       cb(err);
@@ -298,25 +260,23 @@ function suite() {
     var mode = "777";
 
     mkdirp(outputDirpath, mode, function (err) {
-      fs.chmod.restore();
-
-      expect(err).not.toBeDefined();
+      assert.ifError(err);
 
       done();
     });
   });
 
-  it("errors with ENOTDIR if file in path", function (done) {
+  it("errors with ENOTDIR if file in path", (t, done) => {
     fs.mkdir(outputDirpath, function (err) {
-      expect(err).toBeFalsy();
+      assert.ifError(err);
 
       fs.writeFile(outputNestedPath, contents, function (err2) {
-        expect(err2).toBeFalsy();
+        assert.ifError(err2);
 
         mkdirp(outputNestedPath, function (err3) {
-          expect(err3).toBeDefined();
-          expect(err3.code).toEqual("ENOTDIR");
-          expect(err3.path).toEqual(outputNestedPath);
+          assert.ok(err3);
+          assert.strictEqual(err3.code, "ENOTDIR");
+          assert.strictEqual(err3.path, outputNestedPath);
 
           done();
         });
@@ -324,19 +284,19 @@ function suite() {
     });
   });
 
-  it("errors with ENOTDIR if file in path of nested mkdirp", function (done) {
+  it("errors with ENOTDIR if file in path of nested mkdirp", (t, done) => {
     var nestedPastFile = path.join(outputNestedPath, "./bar/baz/");
 
     fs.mkdir(outputDirpath, function (err) {
-      expect(err).toBeFalsy();
+      assert.ifError(err);
 
       fs.writeFile(outputNestedPath, contents, function (err2) {
-        expect(err2).toBeFalsy();
+        assert.ifError(err2);
 
         mkdirp(nestedPastFile, function (err3) {
-          expect(err3).toBeDefined();
-          expect(err3.code).toEqual("ENOTDIR");
-          expect(err3.path).toEqual(outputNestedPath);
+          assert.ok(err3);
+          assert.strictEqual(err3.code, "ENOTDIR");
+          assert.strictEqual(err3.path, outputNestedPath);
 
           done();
         });
@@ -344,26 +304,21 @@ function suite() {
     });
   });
 
-  it("does not change mode of existing file", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
+  it("does not change mode of existing file", skipWin32, (t, done) => {
     var mode = "777";
 
     fs.mkdir(outputDirpath, function (err) {
-      expect(err).toBeFalsy();
+      assert.ifError(err);
 
       fs.writeFile(outputNestedPath, contents, function (err2) {
-        expect(err2).toBeFalsy();
+        assert.ifError(err2);
 
         var existingMode = createdMode(outputNestedPath);
-        expect(existingMode).not.toEqual(mode);
+        assert.notStrictEqual(existingMode, mode);
 
         mkdirp(outputNestedPath, mode, function (err3) {
-          expect(err3).toBeDefined();
-          expect(createdMode(outputNestedPath)).toEqual(existingMode);
+          assert.ok(err3);
+          assert.strictEqual(createdMode(outputNestedPath), existingMode);
 
           done();
         });
@@ -371,83 +326,66 @@ function suite() {
     });
   });
 
-  it("surfaces mkdir errors that happening during recursion", function (done) {
-    var ogMkdir = fs.mkdir;
-
-    var stub = sinon.stub(fs, "mkdir").callsFake(function (dirpath, mode, cb) {
-      if (stub.callCount === 1) {
-        return ogMkdir(dirpath, mode, cb);
-      }
+  it("surfaces mkdir errors that happening during recursion", (t, done) => {
+    var stub = t.mock.method(fs, "mkdir");
+    stub.mock.mockImplementationOnce((p, mode, cb) => {
       cb(new Error("boom"));
-    });
+    }, 2);
 
     mkdirp(outputNestedDirpath, function (err) {
-      fs.mkdir.restore();
-
-      expect(err).toBeDefined();
+      assert.ok(err);
+      assert.strictEqual(stub.mock.callCount(), 2);
 
       done();
     });
   });
 
-  it("surfaces fs.stat errors", function (done) {
-    sinon.stub(fs, "stat").callsFake(function (dirpath, cb) {
+  it("surfaces fs.stat errors", (t, done) => {
+    t.mock.method(fs, "stat", (dirpath, cb) => {
       cb(new Error("boom"));
     });
 
     mkdirp(outputDirpath, function (err) {
-      fs.stat.restore();
-
-      expect(err).toBeDefined();
+      assert.ok(err);
 
       done();
     });
   });
 
-  it("does not attempt fs.chmod if custom mode matches mode on disk", function (done) {
-    if (isWindows) {
-      this.skip();
-      return;
-    }
-
-    var mode = "777";
-
-    mkdirp(outputDirpath, mode, function (err) {
-      expect(err).toBeFalsy();
-
-      var spy = sinon.spy(fs, "chmod");
+  it(
+    "does not attempt fs.chmod if custom mode matches mode on disk",
+    skipWin32,
+    (t, done) => {
+      var mode = "777";
 
       mkdirp(outputDirpath, mode, function (err) {
-        fs.chmod.restore();
+        assert.ifError(err);
 
-        expect(err).toBeFalsy();
-        expect(spy.callCount).toEqual(0);
+        var spy = t.mock.method(fs, "chmod");
 
-        done();
+        mkdirp(outputDirpath, mode, function (err2) {
+          assert.ifError(err2);
+          assert.strictEqual(spy.mock.callCount(), 0);
+
+          done();
+        });
       });
-    });
-  });
+    },
+  );
 
-  describe("symlinks", function () {
-    before(function () {
-      if (isWindows) {
-        this.skip();
-        return;
-      }
-    });
-
-    it("succeeds with a directory at the target of a symlink", function (done) {
+  describe("symlinks", skipWin32, () => {
+    it("succeeds with a directory at the target of a symlink", (t, done) => {
       var target = path.join(outputBase, "target");
 
       fs.mkdir(target, function (err) {
-        expect(err).toBeFalsy();
+        assert.ifError(err);
 
-        fs.symlink(target, outputDirpath, function (err) {
-          expect(err).toBeFalsy();
+        fs.symlink(target, outputDirpath, function (err2) {
+          assert.ifError(err2);
 
-          mkdirp(outputDirpath, function (err) {
-            expect(err).toBeFalsy();
-            expect(createdMode(target)).toBeDefined();
+          mkdirp(outputDirpath, function (err3) {
+            assert.ifError(err3);
+            assert.ok(createdMode(target));
 
             done();
           });
@@ -455,62 +393,62 @@ function suite() {
       });
     });
 
-    it("changes mode of existing directory at the target of a symlink", function (done) {
+    it("changes mode of existing directory at the target of a symlink", (t, done) => {
       var target = path.join(outputBase, "target");
 
       var mode = "777";
 
       fs.mkdir(target, function (err) {
-        expect(err).toBeFalsy();
+        assert.ifError(err);
 
         fs.symlink(target, outputDirpath, function (err2) {
-          expect(err2).toBeFalsy();
-          expect(createdMode(target)).toEqual(expectedDefaultMode());
+          assert.ifError(err2);
+          assert.strictEqual(createdMode(target), expectedDefaultMode());
 
           mkdirp(outputDirpath, mode, function (err3) {
-            expect(err3).toBeFalsy();
-            expect(createdMode(target)).toEqual(expectedMode(mode));
+            assert.strictEqual(err3, undefined);
+            assert.strictEqual(createdMode(target), expectedMode(mode));
             done();
           });
         });
       });
     });
 
-    it("creates nested directories at the target of a symlink", function (done) {
+    it("creates nested directories at the target of a symlink", (t, done) => {
       var target = path.join(outputBase, "target");
       var expected = path.join(target, "./bar/baz/");
 
       fs.mkdir(target, function (err) {
-        expect(err).toBeFalsy();
+        assert.ifError(err);
 
         fs.symlink(target, outputDirpath, function (err2) {
-          expect(err2).toBeFalsy();
+          assert.ifError(err2);
 
           mkdirp(outputNestedDirpath, function (err3) {
-            expect(err3).toBeFalsy();
-            expect(createdMode(expected)).toBeDefined();
+            assert.ifError(err3);
+            assert.ok(createdMode(expected));
             done();
           });
         });
       });
     });
 
-    it("errors with ENOTDIR if the target of a symlink is a file", function (done) {
+    it("errors with ENOTDIR if the target of a symlink is a file", (t, done) => {
       var target = path.join(outputBase, "test.txt");
 
       fs.mkdir(outputDirpath, function (err) {
-        expect(err).toBeFalsy();
+        assert.ifError(err);
 
         fs.writeFile(target, contents, function (err2) {
-          expect(err2).toBeFalsy();
+          assert.ifError(err2);
 
           fs.symlink(target, outputNestedPath, function (err3) {
-            expect(err3).toBeFalsy();
+            assert.ifError(err3);
 
             mkdirp(outputNestedPath, function (err4) {
-              expect(err4).toBeDefined();
-              expect(err4.code).toEqual("ENOTDIR");
-              expect(err4.path).toEqual(target);
+              assert.ok(err4);
+              assert.strictEqual(err4.code, "ENOTDIR");
+              assert.strictEqual(err4.path, target);
               done();
             });
           });
@@ -518,62 +456,60 @@ function suite() {
       });
     });
 
-    it("errors with ENOTDIR if the target of a symlink is a file in a nested mkdirp", function (done) {
+    it("errors with ENOTDIR if the target of a symlink is a file in a nested mkdirp", (t, done) => {
       var target = path.join(outputBase, "test.txt");
 
       fs.writeFile(target, contents, function (err) {
-        expect(err).toBeFalsy();
+        assert.ifError(err);
 
         fs.symlink(target, outputDirpath, function (err2) {
-          expect(err2).toBeFalsy();
+          assert.ifError(err2);
 
           mkdirp(outputNestedDirpath, function (err3) {
-            expect(err3).toBeDefined();
-            expect(err3.code).toEqual("ENOTDIR");
-            expect(err3.path).toEqual(target);
+            assert.ok(err3);
+            assert.strictEqual(err3.code, "ENOTDIR");
+            assert.strictEqual(err3.path, target);
             done();
           });
         });
       });
     });
 
-    it("errors with ENOENT if the target of a symlink is missing (a.k.a. dangling symlink)", function (done) {
+    it("errors with ENOENT if the target of a symlink is missing (a.k.a. dangling symlink)", (t, done) => {
       var target = path.join(outputBase, "dangling-link");
 
       fs.symlink(target, outputDirpath, function (err) {
-        expect(err).toBeFalsy();
+        assert.ifError(err);
 
         mkdirp(outputDirpath, function (err2) {
-          expect(err2).toBeDefined();
-          expect(err2.code).toEqual("ENOENT");
-          expect(err2.path).toEqual(target);
+          assert.ok(err2);
+          assert.strictEqual(err2.code, "ENOENT");
+          assert.strictEqual(err2.path, target);
           done();
         });
       });
     });
 
-    it("properly surfaces top-level error if lstat fails", function (done) {
+    it("properly surfaces top-level error if lstat fails", (t, done) => {
       var target = path.join(outputBase, "test.txt");
 
-      sinon.stub(fs, "lstat").callsFake(function (dirpath, cb) {
+      t.mock.method(fs, "lstat", (dirpath, cb) => {
         cb(new Error("boom"));
       });
 
       fs.mkdir(outputDirpath, function (err) {
-        expect(err).toBeFalsy();
+        assert.ifError(err);
 
         fs.writeFile(target, contents, function (err2) {
-          expect(err2).toBeFalsy();
+          assert.ifError(err2);
 
           fs.symlink(target, outputNestedPath, function (err3) {
-            expect(err3).toBeFalsy();
+            assert.ifError(err3);
 
             mkdirp(outputNestedPath, function (err4) {
-              fs.lstat.restore();
-
-              expect(err4).toBeDefined();
-              expect(err4.code).toEqual("EEXIST");
-              expect(err4.path).toEqual(outputNestedPath);
+              assert.ok(err4);
+              assert.strictEqual(err4.code, "EEXIST");
+              assert.strictEqual(err4.path, outputNestedPath);
 
               done();
             });
@@ -582,22 +518,20 @@ function suite() {
       });
     });
 
-    it("properly surfaces top-level error if readlink fails", function (done) {
+    it("properly surfaces top-level error if readlink fails", (t, done) => {
       var target = path.join(outputBase, "target");
 
-      sinon.stub(fs, "readlink").callsFake(function (dirpath, cb) {
+      t.mock.method(fs, "readlink", (dirpath, cb) => {
         cb(new Error("boom"));
       });
 
       fs.symlink(target, outputDirpath, function (err) {
-        expect(err).toBeFalsy();
+        assert.ifError(err);
 
         mkdirp(outputDirpath, function (err2) {
-          fs.readlink.restore();
-
-          expect(err2).toBeDefined();
-          expect(err2.code).toEqual("EEXIST");
-          expect(err2.path).toEqual(outputDirpath);
+          assert.ok(err2);
+          assert.strictEqual(err2.code, "EEXIST");
+          assert.strictEqual(err2.path, outputDirpath);
 
           done();
         });
@@ -608,15 +542,15 @@ function suite() {
 
 describe("mkdirp", suite);
 
-describe("mkdirp with umask", function () {
+describe("mkdirp with umask", () => {
   var startingUmask;
-  before(function (done) {
+  before((t, done) => {
     startingUmask = process.umask(parseInt("066", 8));
 
     done();
   });
 
-  after(function (done) {
+  after((t, done) => {
     process.umask(startingUmask);
 
     done();
