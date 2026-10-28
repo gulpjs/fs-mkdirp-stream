@@ -92,7 +92,7 @@ function suite() {
 
   it("makes a single directory", function (t, done) {
     mkdirp(outputDirpath, function (err) {
-      assert.ok(!err);
+      assert.ifError(err);
       assert.ok(createdMode(outputDirpath));
 
       done();
@@ -104,7 +104,7 @@ function suite() {
     { skip: isWindows },
     function (t, done) {
       mkdirp(outputDirpath, function (err) {
-        assert.ok(!err);
+        assert.ifError(err);
         assert.strictEqual(createdMode(outputDirpath), expectedDefaultMode());
 
         done();
@@ -114,7 +114,7 @@ function suite() {
 
   it("makes multiple directories", function (t, done) {
     mkdirp(outputNestedDirpath, function (err) {
-      assert.ok(!err);
+      assert.ifError(err);
       assert.ok(createdMode(outputNestedDirpath));
 
       done();
@@ -126,7 +126,7 @@ function suite() {
     { skip: isWindows },
     function (t, done) {
       mkdirp(outputNestedDirpath, function (err) {
-        assert.ok(!err);
+        assert.ifError(err);
         assert.strictEqual(
           createdMode(outputNestedDirpath),
           expectedDefaultMode(),
@@ -144,7 +144,7 @@ function suite() {
       var mode = "777";
 
       mkdirp(outputDirpath, mode, function (err) {
-        assert.ok(!err);
+        assert.ifError(err);
         assert.strictEqual(createdMode(outputDirpath), expectedMode(mode));
 
         done();
@@ -159,7 +159,7 @@ function suite() {
       var mode = parseInt("777", 8);
 
       mkdirp(outputDirpath, mode, function (err) {
-        assert.ok(!err);
+        assert.ifError(err);
         assert.strictEqual(createdMode(outputDirpath), expectedMode(mode));
 
         done();
@@ -171,7 +171,7 @@ function suite() {
     var mode = parseInt("777", 8);
 
     mkdirp(outputDirpath, mode, function (err) {
-      assert.ok(!err);
+      assert.ifError(err);
       assert.strictEqual(createdMode(outputDirpath), mode);
 
       done();
@@ -185,7 +185,7 @@ function suite() {
       var mode = "2700";
 
       mkdirp(outputDirpath, mode, function (err) {
-        assert.ok(!err);
+        assert.ifError(err);
         assert.strictEqual(createdMode(outputDirpath), expectedMode(mode));
 
         done();
@@ -200,7 +200,7 @@ function suite() {
       var mode = "777";
 
       mkdirp(outputDirpath, mode, function (err) {
-        assert.ok(!err);
+        assert.ifError(err);
 
         mkdirp(outputDirpath, function (err2) {
           assert.ok(!err2);
@@ -219,7 +219,7 @@ function suite() {
       var mode = "777";
 
       mkdirp(outputNestedDirpath, mode, function (err) {
-        assert.ok(!err);
+        assert.ifError(err);
         assert.strictEqual(
           createdMode(outputNestedDirpath),
           expectedMode(mode),
@@ -238,7 +238,7 @@ function suite() {
       var mode = "777";
 
       mkdirp(outputNestedDirpath, mode, function (err) {
-        assert.ok(!err);
+        assert.ifError(err);
         assert.strictEqual(createdMode(outputDirpath), expectedDefaultMode());
         assert.strictEqual(
           createdMode(intermediateDirpath),
@@ -261,7 +261,7 @@ function suite() {
       var mode = "777";
 
       fs.mkdir(outputDirpath, function (err) {
-        assert.ok(!err);
+        assert.ifError(err);
         assert.strictEqual(createdMode(outputDirpath), expectedDefaultMode());
 
         mkdirp(outputDirpath, mode, function (err2) {
@@ -298,7 +298,7 @@ function suite() {
     var mode = "777";
 
     mkdirp(outputDirpath, mode, function (err) {
-      assert.ok(!err);
+      assert.ifError(err);
 
       done();
     });
@@ -306,7 +306,7 @@ function suite() {
 
   it("errors with ENOTDIR if file in path", function (t, done) {
     fs.mkdir(outputDirpath, function (err) {
-      assert.ok(!err);
+      assert.ifError(err);
 
       fs.writeFile(outputNestedPath, contents, function (err2) {
         assert.ok(!err2);
@@ -326,7 +326,7 @@ function suite() {
     var nestedPastFile = path.join(outputNestedPath, "./bar/baz/");
 
     fs.mkdir(outputDirpath, function (err) {
-      assert.ok(!err);
+      assert.ifError(err);
 
       fs.writeFile(outputNestedPath, contents, function (err2) {
         assert.ok(!err2);
@@ -349,7 +349,7 @@ function suite() {
       var mode = "777";
 
       fs.mkdir(outputDirpath, function (err) {
-        assert.ok(!err);
+        assert.ifError(err);
 
         fs.writeFile(outputNestedPath, contents, function (err2) {
           assert.ok(!err2);
@@ -401,12 +401,12 @@ function suite() {
       var mode = "777";
 
       mkdirp(outputDirpath, mode, function (err) {
-        assert.ok(!err);
+        assert.ifError(err);
 
         var spy = t.mock.method(fs, "chmod");
 
         mkdirp(outputDirpath, mode, function (err) {
-          assert.ok(!err);
+          assert.ifError(err);
           assert.strictEqual(spy.mock.callCount(), 0);
 
           done();
@@ -420,13 +420,13 @@ function suite() {
       var target = path.join(outputBase, "target");
 
       fs.mkdir(target, function (err) {
-        assert.ok(!err);
+        assert.ifError(err);
 
         fs.symlink(target, outputDirpath, function (err) {
-          assert.ok(!err);
+          assert.ifError(err);
 
           mkdirp(outputDirpath, function (err) {
-            assert.ok(!err);
+            assert.ifError(err);
             assert.ok(createdMode(target));
 
             done();
@@ -441,7 +441,7 @@ function suite() {
       var mode = "777";
 
       fs.mkdir(target, function (err) {
-        assert.ok(!err);
+        assert.ifError(err);
 
         fs.symlink(target, outputDirpath, function (err2) {
           assert.ok(!err2);
@@ -461,7 +461,7 @@ function suite() {
       var expected = path.join(target, "./bar/baz/");
 
       fs.mkdir(target, function (err) {
-        assert.ok(!err);
+        assert.ifError(err);
 
         fs.symlink(target, outputDirpath, function (err2) {
           assert.ok(!err2);
@@ -479,7 +479,7 @@ function suite() {
       var target = path.join(outputBase, "test.txt");
 
       fs.mkdir(outputDirpath, function (err) {
-        assert.ok(!err);
+        assert.ifError(err);
 
         fs.writeFile(target, contents, function (err2) {
           assert.ok(!err2);
@@ -502,7 +502,7 @@ function suite() {
       var target = path.join(outputBase, "test.txt");
 
       fs.writeFile(target, contents, function (err) {
-        assert.ok(!err);
+        assert.ifError(err);
 
         fs.symlink(target, outputDirpath, function (err2) {
           assert.ok(!err2);
@@ -521,7 +521,7 @@ function suite() {
       var target = path.join(outputBase, "dangling-link");
 
       fs.symlink(target, outputDirpath, function (err) {
-        assert.ok(!err);
+        assert.ifError(err);
 
         mkdirp(outputDirpath, function (err2) {
           assert.ok(err2);
@@ -540,7 +540,7 @@ function suite() {
       });
 
       fs.mkdir(outputDirpath, function (err) {
-        assert.ok(!err);
+        assert.ifError(err);
 
         fs.writeFile(target, contents, function (err2) {
           assert.ok(!err2);
@@ -568,7 +568,7 @@ function suite() {
       });
 
       fs.symlink(target, outputDirpath, function (err) {
-        assert.ok(!err);
+        assert.ifError(err);
 
         mkdirp(outputDirpath, function (err2) {
           assert.ok(err2);
