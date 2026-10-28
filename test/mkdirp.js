@@ -123,9 +123,7 @@ function suite() {
 
   it(
     "makes multiple directories w/ default mode",
-    {
-      skip: isWindows,
-    },
+    { skip: isWindows },
     function (t, done) {
       mkdirp(outputNestedDirpath, function (err) {
         assert.ok(!err);
@@ -141,9 +139,7 @@ function suite() {
 
   it(
     "makes directory with custom mode as string",
-    {
-      skip: isWindows,
-    },
+    { skip: isWindows },
     function (t, done) {
       var mode = "777";
 
@@ -158,9 +154,7 @@ function suite() {
 
   it(
     "makes directory with custom mode as octal",
-    {
-      skip: isWindows,
-    },
+    { skip: isWindows },
     function (t, done) {
       var mode = parseInt("777", 8);
 
@@ -173,28 +167,20 @@ function suite() {
     },
   );
 
-  it(
-    "does not mask a custom mode",
-    {
-      skip: isWindows,
-    },
-    function (t, done) {
-      var mode = parseInt("777", 8);
+  it("does not mask a custom mode", { skip: isWindows }, function (t, done) {
+    var mode = parseInt("777", 8);
 
-      mkdirp(outputDirpath, mode, function (err) {
-        assert.ok(!err);
-        assert.strictEqual(createdMode(outputDirpath), mode);
+    mkdirp(outputDirpath, mode, function (err) {
+      assert.ok(!err);
+      assert.strictEqual(createdMode(outputDirpath), mode);
 
-        done();
-      });
-    },
-  );
+      done();
+    });
+  });
 
   it(
     "can create a directory with setgid permission",
-    {
-      skip: isWindows,
-    },
+    { skip: isWindows },
     function (t, done) {
       var mode = "2700";
 
@@ -209,9 +195,7 @@ function suite() {
 
   it(
     "does not change directory mode if exists and no mode given",
-    {
-      skip: isWindows,
-    },
+    { skip: isWindows },
     function (t, done) {
       var mode = "777";
 
@@ -230,9 +214,7 @@ function suite() {
 
   it(
     "makes multiple directories with custom mode",
-    {
-      skip: isWindows,
-    },
+    { skip: isWindows },
     function (t, done) {
       var mode = "777";
 
@@ -250,9 +232,7 @@ function suite() {
 
   it(
     "uses default mode on intermediate directories",
-    {
-      skip: isWindows,
-    },
+    { skip: isWindows },
     function (t, done) {
       var intermediateDirpath = path.dirname(outputNestedDirpath);
       var mode = "777";
@@ -276,9 +256,7 @@ function suite() {
 
   it(
     "changes mode of existing directory",
-    {
-      skip: isWindows,
-    },
+    { skip: isWindows },
     function (t, done) {
       var mode = "777";
 
@@ -366,9 +344,7 @@ function suite() {
 
   it(
     "does not change mode of existing file",
-    {
-      skip: isWindows,
-    },
+    { skip: isWindows },
     function (t, done) {
       var mode = "777";
 
@@ -420,9 +396,7 @@ function suite() {
 
   it(
     "does not attempt fs.chmod if custom mode matches mode on disk",
-    {
-      skip: isWindows,
-    },
+    { skip: isWindows },
     function (t, done) {
       var mode = "777";
 
